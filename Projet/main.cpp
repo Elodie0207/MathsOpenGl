@@ -42,9 +42,9 @@ void createMenu() {
 
     // Ajout des entrées dans le menu
     glutAddMenuEntry("couleurs", MENU_OPTION_1);
-    glutAddMenuEntry("découpage", MENU_OPTION_2);
-    glutAddMenuEntry("tracé fenêtre", MENU_OPTION_3);
-    glutAddMenuEntry("fenêtrage", MENU_OPTION_4);
+    glutAddMenuEntry("decoupage", MENU_OPTION_2);
+    glutAddMenuEntry("trace fenetre", MENU_OPTION_3);
+    glutAddMenuEntry("fenetrage", MENU_OPTION_4);
     glutAddMenuEntry("remplissage", MENU_OPTION_5);
     glutAddMenuEntry("Exit", MENU_OPTION_EXIT);
 
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     glutCreateWindow("Dropdown Menu");
 
     glutDisplayFunc(display);
-    createMenu(); 
+    createMenu();
 
     glutMainLoop();
     return 0;
