@@ -4,28 +4,67 @@
 #include <GL/freeglut.h>
 
 
+enum {
+    MENU_OPTION_1,
+    MENU_OPTION_2,
+    MENU_OPTION_3,
+    MENU_OPTION_4,
+    MENU_OPTION_5,
+    MENU_OPTION_EXIT
+};
+
+void menu(int value) {
+    switch (value) {
+        case MENU_OPTION_1:
+            // a faire
+            break;
+        case MENU_OPTION_2:
+            // a faire
+            break;
+        case MENU_OPTION_3:
+            // a faire
+            break;
+        case MENU_OPTION_4:
+            // a faire
+            break;
+        case MENU_OPTION_5:
+            // a faire
+            break;
+        case MENU_OPTION_EXIT:
+            exit(0); // Quitter le programme
+
+    }
+    glutPostRedisplay(); // Demande à GLUT de redessiner la fenêtre
+}
+
+void createMenu() {
+    glutCreateMenu(menu); // Création du menu
+
+    // Ajout des entrées dans le menu
+    glutAddMenuEntry("couleurs", MENU_OPTION_1);
+    glutAddMenuEntry("découpage", MENU_OPTION_2);
+    glutAddMenuEntry("tracé fenêtre", MENU_OPTION_3);
+    glutAddMenuEntry("fenêtrage", MENU_OPTION_4);
+    glutAddMenuEntry("remplissage", MENU_OPTION_5);
+    glutAddMenuEntry("Exit", MENU_OPTION_EXIT);
+
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+}
+
 void display() {
-    glClear(GL_COLOR_BUFFER_BIT); // Clear the color buffer
+    glClear(GL_COLOR_BUFFER_BIT);
 
-    // Draw something here
-    // Example: Draw a triangle
-    glBegin(GL_TRIANGLES);
-    glColor3f(1.0, 0.0, 0.0); // Set color to red
-    glVertex2f(-0.5, -0.5);
-    glColor3f(0.0, 1.0, 0.0); // Set color to green
-    glVertex2f(0.5, -0.5);
-    glColor3f(0.0, 0.0, 1.0); // Set color to blue
-    glVertex2f(0.0, 0.5);
-    glEnd();
-
-    glFlush(); // Flush the rendering pipeline
+    glFlush();
 }
 
 int main(int argc, char** argv) {
-    glutInit(&argc, argv); // Initialize GLUT
-    glutCreateWindow("Simple Window"); // Create a window with the given title
-    glutDisplayFunc(display); // Set the display callback function
-    glutMainLoop(); // Enter the GLUT event processing loop
+    glutInit(&argc, argv);
+    glutInitWindowSize(400, 300);
+    glutCreateWindow("Dropdown Menu");
 
+    glutDisplayFunc(display);
+    createMenu(); 
+
+    glutMainLoop();
     return 0;
 }
