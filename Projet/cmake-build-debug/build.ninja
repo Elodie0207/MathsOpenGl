@@ -52,16 +52,9 @@ build cmake_object_order_depends_target_MathsOpenGl: phony || CMakeFiles/MathsOp
 build CMakeFiles/MathsOpenGl.dir/main.cpp.obj: CXX_COMPILER__MathsOpenGl_unscanned_Debug C$:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/main.cpp || cmake_object_order_depends_target_MathsOpenGl
   DEP_FILE = CMakeFiles\MathsOpenGl.dir\main.cpp.obj.d
   FLAGS = -g -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glfw/include -IC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glew/include
+  INCLUDES = -IC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glfw/include -IC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glut/include
   OBJECT_DIR = CMakeFiles\MathsOpenGl.dir
   OBJECT_FILE_DIR = CMakeFiles\MathsOpenGl.dir
-
-build CMakeFiles/MathsOpenGl.dir/C_/Users/Enola/Desktop/Maths/MathsOpenGl/common/GLShader.cpp.obj: CXX_COMPILER__MathsOpenGl_unscanned_Debug C$:/Users/Enola/Desktop/Maths/MathsOpenGl/common/GLShader.cpp || cmake_object_order_depends_target_MathsOpenGl
-  DEP_FILE = CMakeFiles\MathsOpenGl.dir\C_\Users\Enola\Desktop\Maths\MathsOpenGl\common\GLShader.cpp.obj.d
-  FLAGS = -g -fdiagnostics-color=always
-  INCLUDES = -IC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glfw/include -IC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glew/include
-  OBJECT_DIR = CMakeFiles\MathsOpenGl.dir
-  OBJECT_FILE_DIR = CMakeFiles\MathsOpenGl.dir\C_\Users\Enola\Desktop\Maths\MathsOpenGl\common
 
 
 # =============================================================================
@@ -71,10 +64,10 @@ build CMakeFiles/MathsOpenGl.dir/C_/Users/Enola/Desktop/Maths/MathsOpenGl/common
 #############################################
 # Link the executable MathsOpenGl.exe
 
-build MathsOpenGl.exe: CXX_EXECUTABLE_LINKER__MathsOpenGl_Debug CMakeFiles/MathsOpenGl.dir/main.cpp.obj CMakeFiles/MathsOpenGl.dir/C_/Users/Enola/Desktop/Maths/MathsOpenGl/common/GLShader.cpp.obj
+build MathsOpenGl.exe: CXX_EXECUTABLE_LINKER__MathsOpenGl_Debug CMakeFiles/MathsOpenGl.dir/main.cpp.obj
   FLAGS = -g
-  LINK_LIBRARIES = -lglfw3  -lopengl32  -lglew32  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
-  LINK_PATH = -LC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/opengl32   -LC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glfw/lib-static-ucrt   -LC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glew/lib/Release/x64
+  LINK_LIBRARIES = -lglfw3  -lopengl32  -lfreeglut  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  LINK_PATH = -LC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/opengl32   -LC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glfw/lib-static-ucrt   -LC:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glut/lib/x64
   OBJECT_DIR = CMakeFiles\MathsOpenGl.dir
   POST_BUILD = cd .
   PRE_LINK = cd .

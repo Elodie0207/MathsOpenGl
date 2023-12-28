@@ -88,7 +88,7 @@
 				},
 				{
 					"backtrace" : 7,
-					"path" : "C:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glew/include"
+					"path" : "C:/Users/Enola/Desktop/Maths/MathsOpenGl/Projet/../libs/glut/include"
 				}
 			],
 			"language" : "CXX",
@@ -102,8 +102,7 @@
 			},
 			"sourceIndexes" : 
 			[
-				0,
-				1
+				0
 			]
 		}
 	],
@@ -132,7 +131,7 @@
 			},
 			{
 				"backtrace" : 4,
-				"fragment" : "-LC:\\Users\\Enola\\Desktop\\Maths\\MathsOpenGl\\Projet\\..\\libs\\glew\\lib\\Release\\x64",
+				"fragment" : "-LC:\\Users\\Enola\\Desktop\\Maths\\MathsOpenGl\\Projet\\..\\libs\\glut\\lib\\x64",
 				"role" : "libraryPath"
 			},
 			{
@@ -147,7 +146,7 @@
 			},
 			{
 				"backtrace" : 5,
-				"fragment" : "-lglew32",
+				"fragment" : "-lfreeglut",
 				"role" : "libraries"
 			},
 			{
@@ -170,8 +169,7 @@
 			"name" : "Source Files",
 			"sourceIndexes" : 
 			[
-				0,
-				1
+				0
 			]
 		}
 	],
@@ -181,12 +179,6 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "main.cpp",
-			"sourceGroupIndex" : 0
-		},
-		{
-			"backtrace" : 1,
-			"compileGroupIndex" : 0,
-			"path" : "C:/Users/Enola/Desktop/Maths/MathsOpenGl/common/GLShader.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

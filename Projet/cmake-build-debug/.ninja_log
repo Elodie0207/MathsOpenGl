@@ -1,8 +1,9 @@
 # ninja log v5
-1	728	7254759701030822	CMakeFiles/MathsOpenGl.dir/main.cpp.obj	c822844c21b49c1c
-47	831	7254759702054548	CMakeFiles/MathsOpenGl.dir/C_/Users/Enola/Desktop/Maths/MathsOpenGl/common/GLShader.cpp.obj	99d88cd9253ed533
-831	989	7254759703611234	MathsOpenGl.exe	37cefaf20cff3bf9
-3	695	7254765393538605	CMakeFiles/MathsOpenGl.dir/main.cpp.obj	c822844c21b49c1c
-695	854	7254765395098783	MathsOpenGl.exe	37cefaf20cff3bf9
-3	696	7254765502517893	CMakeFiles/MathsOpenGl.dir/main.cpp.obj	c822844c21b49c1c
-696	856	7254765504086305	MathsOpenGl.exe	37cefaf20cff3bf9
+3	1121	7254809639290527	CMakeFiles/MathsOpenGl.dir/main.cpp.obj	673b615cc4b0a9eb
+698	853	7254780143706082	MathsOpenGl.exe	37cefaf20cff3bf9
+12	720	7254793583689308	CMakeFiles/MathsOpenGl.dir/C_/Users/Enola/Desktop/Maths/MathsOpenGl/common/GLShader.cpp.obj	644e14a9af80f58b
+88	481	7254771800017910	CMakeFiles/MathsOpenGl.dir/MathsFormule.cpp.obj	74cdc406d741366d
+1	114	7254814176163867	build.ninja	15baf61c4a7d4a36
+4	114	7254814194850367	MathsOpenGl.exe	d3cac93690efd72c
+3	1122	7254814353137767	CMakeFiles/MathsOpenGl.dir/main.cpp.obj	673b615cc4b0a9eb
+1122	1220	7254814354091723	MathsOpenGl.exe	d3cac93690efd72c
