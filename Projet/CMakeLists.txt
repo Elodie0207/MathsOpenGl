@@ -24,6 +24,11 @@ add_executable(MathsOpenGl
         include/SystemHelper.hpp
         src/Renderer/DrawObject.cpp
         include/Renderer/DrawObject.hpp
+        src/Renderer/Texture.cpp
+        include/Renderer/Texture.hpp
+        src/UUID.cpp
+        include/UUID.hpp
+        include/stb_image.h
 )
 
 target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})
