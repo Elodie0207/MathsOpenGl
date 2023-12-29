@@ -9,6 +9,8 @@
 #include <GLFW/glfw3.h>
 #include <GL/freeglut.h>
 #include <string>
+#include <unordered_map>
+#include <vector>
 
 #include "Camera.hpp"
 
