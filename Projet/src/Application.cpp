@@ -86,6 +86,7 @@ Application::~Application() {}
 void Application::Initialize() {
 	glEnable(GL_TEXTURE_2D);
 	glLineWidth(5.0f);
+	glPointSize(5.0f);
 
 	m_Tools.Initialize();
 
@@ -226,13 +227,19 @@ void Application::OnMouseButton(MouseButton button, MousePressState state, int m
 	{
 		mouseState.timePressed = GetTime();
 		mouseState.positionPressed = mousePos;
-		m_Tools.OnMouseClick(button, mouseState);
+		if(m_Tools.OnMouseClick(button, mouseState))
+		{
+			Redraw();
+		}
 	}
 	else
 	{
 		mouseState.timeReleased = GetTime();
 		mouseState.positionReleased = mousePos;
-		m_Tools.OnMouseRelease(button, mouseState);
+		if(m_Tools.OnMouseRelease(button, mouseState))
+		{
+			Redraw();
+		}
 	}
 
 	auto eventIt = m_OnMouseEvents.find(button);
@@ -248,7 +255,10 @@ void Application::OnMouseButton(MouseButton button, MousePressState state, int m
 void Application::OnMouseMotion(int mouseX, int mouseY)
 {
 	m_MousePos = Vec2Int(mouseX, mouseY);
-	m_Tools.OnMouseMove(m_MousePos);
+	if(m_Tools.OnMouseMove(m_MousePos))
+	{
+		Redraw();
+	}
 }
 
 double Application::GetTime() const {
@@ -312,7 +322,7 @@ Vec2Int Application::GetMousePos() const {
 	return m_MousePos;
 }
 
-Vec2 Application::GetInGameMousePos() const
+Vec2 Application::GetWorldMousePos() const
 {
 	return m_Camera.ScreenToGameSpace(m_MousePos);
 }

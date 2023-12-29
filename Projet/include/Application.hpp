@@ -47,7 +47,7 @@ public:
 	MouseState GetMouseState(MouseButton key) const;
 
 	Vec2Int GetMousePos() const;
-	Vec2 GetInGameMousePos() const;
+	Vec2 GetWorldMousePos() const;
 
 	Vec2 WorldToScreenPos(Vec2 pos) const;
 	Vec2 ScreenToWorldPos(Vec2 pos) const;

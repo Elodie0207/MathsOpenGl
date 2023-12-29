@@ -43,6 +43,12 @@ public:
 		return glm::normalize(val);
 	}
 
+	template<typename T>
+	inline static float Distance(const T& l, const T& r)
+	{
+		return glm::distance(l, r);
+	}
+
 	static Mat4 TRS(Vec3 position);
 	static Mat4 TRS(Vec3 position, Quat rotation);
 	static Mat4 TRS(Vec3 position, Vec3 scale);

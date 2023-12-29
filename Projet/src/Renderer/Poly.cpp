@@ -14,7 +14,7 @@ Poly::Poly(const std::initializer_list<Vec2Int>& points) : m_Points(points)
 }
 
 bool Poly::IsValid() const {
-	return m_Points.size() >= 3;
+	return m_Points.size() > 2;
 }
 
 int Poly::GetPointCount() const {
@@ -46,17 +46,31 @@ Vec2Int &Poly::operator[](int index) {
 }
 
 void Poly::Draw(const Mat4 &viewProjMatrix) const {
+	if(GetPointCount() == 0) return;
 
-	glBegin(GL_LINE_LOOP);
-
-	for (auto& pos : m_Points)
+	else if(GetPointCount() == 1)
 	{
+		glBegin(GL_POINTS);
 		glColor4fv(&m_Color[0]);
+		auto pos = m_Points[0];
 		Vec3 vertexPos = viewProjMatrix * Vec4(pos.x, pos.y, 0.0, 1.0);
 		glVertex3fv(&vertexPos[0]);
+		glEnd();
+	}
+	else
+	{	glBegin(GL_LINE_LOOP);
+
+		for (auto& pos : m_Points)
+		{
+			glColor4fv(&m_Color[0]);
+			Vec3 vertexPos = viewProjMatrix * Vec4(pos.x, pos.y, 0.0, 1.0);
+			glVertex3fv(&vertexPos[0]);
+		}
+
+		glEnd();
 	}
 
-	glEnd();
+
 
 }
 

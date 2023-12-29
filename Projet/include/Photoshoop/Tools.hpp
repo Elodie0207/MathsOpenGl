@@ -65,28 +65,49 @@ public:
 	 * Function called when the mouse has clicked on the window.
 	 * @param mouse The button that clicked
 	 * @param state The state of the pressed mouse button.
+	 * @return Whether we should rerender.
 	 */
-	void OnMouseClick(MouseButton mouse, const MouseState &state);
+	bool OnMouseClick(MouseButton mouse, const MouseState &state);
 
 	/**
 	 * Function called when the mouse has clicked on the window.
 	 * @param mouse The button that clicked
 	 * @param state The state of the released mouse button.
+	 * @return Whether we should rerender.
 	 */
-	void OnMouseRelease(MouseButton mouse, const MouseState &state);
+	bool OnMouseRelease(MouseButton mouse, const MouseState &state);
 
 	/**
 	 * Function called each time the mouse move.
 	 * @param mousePos the new position of the mouse.
+	 * @return Whether we should rerender.
 	 */
-	void OnMouseMove(Vec2Int mousePos);
+	bool OnMouseMove(Vec2Int mousePos);
+private:
+	/// === DRAW POLY ===
+	void ClearDrawnPoly();
+	void AddPointToPoly(Vec2Int screenPos);
+	void StopDrawingPoly();
+	Poly polyDrawn;
+	bool drawing = false;
+
+	/// === DRAW WINDOW ===
+
+	//TODO: Add function & variables to draw the window here.
+
+	/// === WINDOWING ===
+
+	//TODO: Add function & variables to make the windowing here.
+
+	/// === FILLING ===
+
+	//TODO: Add function & variables to make the filling here.
 
 private:
 	Tools m_Tool = Tools::MOVE;
-	Application *m_App;
+	Application* m_App;
 
 	DrawObject drawObj;
-	Poly poly;
 	Quad quad;
 	float m_CameraSpeed = 50.0f;
 };
