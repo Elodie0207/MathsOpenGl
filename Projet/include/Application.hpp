@@ -13,22 +13,7 @@
 #include <vector>
 
 #include "Camera.hpp"
-#include "Renderer/DrawObject.hpp"
-#include "Renderer/Poly.hpp"
-#include "Renderer/Quad.hpp"
-
-enum class MouseButton
-{
-	Left = GLUT_LEFT_BUTTON,
-	Middle = GLUT_MIDDLE_BUTTON,
-	Right = GLUT_RIGHT_BUTTON,
-};
-
-enum class MousePressState
-{
-	Up = GLUT_UP,
-	Down = GLUT_DOWN,
-};
+#include "Photoshoop/Tools.hpp"
 
 struct ApplicationSpecification
 {
@@ -38,26 +23,6 @@ struct ApplicationSpecification
     uint32_t height = 900;
     int argc;
     char** argv;
-};
-
-struct KeyState
-{
-	bool pressed = false;
-	double timePressed = 0.0;
-	double timeReleased = 0.0;
-	inline double GetTimePressed() const { return timeReleased - timePressed; }
-};
-
-struct MouseState
-{
-	bool pressed = false;
-	double timePressed = 0.0;
-	double timeReleased = 0.0;
-	Vec2Int positionPressed = Vec2Int(0);
-	Vec2Int positionReleased = Vec2Int(0);
-
-	inline Vec2Int GetTravelDistance() const { return positionReleased - positionPressed; }
-	inline double GetTimePressed() const { return timeReleased - timePressed; }
 };
 
 class Application
@@ -71,6 +36,21 @@ public:
     inline uint32_t GetWidth() const { return m_AppSpec.width; }
     inline uint32_t GetHeight() const { return m_AppSpec.height; }
     inline float GetAspectRation() const { return static_cast<float>(m_AppSpec.width) / static_cast<float>(m_AppSpec.height); }
+
+	inline const Camera& GetCamera() const { return m_Camera; }
+	inline Camera& GetCamera() { return m_Camera; }
+
+	double GetTime() const;
+	bool GetKeyDown(char key) const;
+	KeyState GetKeyState(char key) const;
+	bool GetMouseDown(MouseButton key) const;
+	MouseState GetMouseState(MouseButton key) const;
+
+	Vec2Int GetMousePos() const;
+	Vec2 GetInGameMousePos() const;
+
+	Vec2 WorldToScreenPos(Vec2 pos) const;
+	Vec2 ScreenToWorldPos(Vec2 pos) const;
 
 private:
 	static void StaticRender(void* appPtr);
@@ -98,18 +78,10 @@ private:
 	void Update();
 
 	void UpdateDeltaTime(double& Time, float& DeltaTime);
-	double GetTime() const;
-	bool GetKeyDown(char key) const;
-	KeyState GetKeyState(char key) const;
-	bool GetMouseDown(MouseButton key) const;
-	MouseState GetMouseState(MouseButton key) const;
-	Vec2Int GetMousePos() const;
-	Vec2 GetInGameMousePos() const;
 
 private:
     ApplicationSpecification m_AppSpec;
 	Camera m_Camera;
-	float m_CameraSpeed = 50.0f;
 	double m_RenderTime = 0; float m_RenderDeltaTime = 0.0166f;
 	double m_UpdateTime = 0; float m_UpdateDeltaTime = 0.0166f;
 
@@ -121,7 +93,5 @@ private:
 	std::vector<std::function<void(char, int, int)>> m_OnKeyReleaseEvents;
 	std::unordered_map<MouseButton, std::vector<std::function<void(const MouseState&)>>> m_OnMouseEvents;
 
-	DrawObject drawObj = DrawObject({{0,0}, { 0, 512}, { 512, 512}, { 512, 0}});
-	Poly poly = Poly({{0, 0}, {0, 512}, {512, 512}});
-	Quad quad = Quad(Vec2(512, 512), Vec2(512, 512));
+	ToolsHandler m_Tools;
 };

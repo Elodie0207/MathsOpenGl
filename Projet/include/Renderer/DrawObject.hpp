@@ -16,6 +16,7 @@ class DrawObject {
 		Loop,
 	};
 public:
+	DrawObject() = default;
 	DrawObject(const std::vector<Vec2>& points);
 	DrawObject(const std::initializer_list<Vec2>& points);
 	~DrawObject();

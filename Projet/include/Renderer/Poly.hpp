@@ -10,6 +10,7 @@
 class Poly
 {
 public:
+	Poly() = default;
 	Poly(const std::vector<Vec2Int>& points);
 	Poly(const std::initializer_list<Vec2Int>& points);
 	~Poly();
@@ -29,6 +30,6 @@ public:
 	Vec2Int& operator[](int index);
 
 	Vec4 m_Color = Vec4(1.0f);
-private:
+
 	std::vector<Vec2Int> m_Points;
 };

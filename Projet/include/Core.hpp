@@ -9,6 +9,7 @@
 #include "Assert.hpp"
 #include "Math.hpp"
 #include "UUID.hpp"
+#include "Input.hpp"
 
 #include "GLFW/glfw3.h"
 #include "GL/freeglut.h"

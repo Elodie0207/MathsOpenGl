@@ -8,16 +8,6 @@
 #include <functional>
 
 #define CallNextUpdate(appPtr) glutTimerFuncUcall(1000 / 60, &Application::StaticUpdate, 0, appPtr);
-static Application* s_MainApp = nullptr;
-
-enum {
-	MENU_OPTION_1,
-	MENU_OPTION_2,
-	MENU_OPTION_3,
-	MENU_OPTION_4,
-	MENU_OPTION_5,
-	MENU_OPTION_EXIT
-};
 
 ApplicationSpecification::ApplicationSpecification(int argc, char **argv) : argc(argc), argv(argv) {}
 
@@ -76,17 +66,12 @@ void Application::StaticOnMouseMotion(int mouseX, int mouseY, void* appPtr)
 	static_cast<Application *>(appPtr)->OnMouseMotion(mouseX, mouseY);
 }
 
-Application::Application(ApplicationSpecification appSpec) : m_AppSpec(std::move(appSpec)), m_Camera(m_AppSpec.width, m_AppSpec.height)
+Application::Application(ApplicationSpecification appSpec) : m_AppSpec(std::move(appSpec)), m_Camera(m_AppSpec.width, m_AppSpec.height), m_Tools(this)
 {
-	drawObj.m_Color = Vec4(0.8,0.2,0.3,1);
-	poly.m_Color = Vec4(0.2,0.3,0.8,1);
-
 	REI_ASSERT(m_AppSpec.width > 0 && m_AppSpec.height > 0, "The Aspect Ration ({0}/{1}) is no valid.", m_AppSpec.width, m_AppSpec.height);
 	glutInit(&m_AppSpec.argc, m_AppSpec.argv);
 	glutInitWindowSize(m_AppSpec.width, m_AppSpec.height);
 	glutCreateWindow(m_AppSpec.name.c_str());
-
-	s_MainApp = this;
 
 	REI_INFO("OpenGL Info:");
 	REI_INFO("  Vendor: {0}", (const char*)glGetString(GL_VENDOR));
@@ -96,16 +81,13 @@ Application::Application(ApplicationSpecification appSpec) : m_AppSpec(std::move
 	Initialize();
 }
 
-Application::~Application()
-{
-	s_MainApp = nullptr;
-}
+Application::~Application() {}
 
 void Application::Initialize() {
 	glEnable(GL_TEXTURE_2D);
 	glLineWidth(5.0f);
 
-	quad.Texture = Texture::Create(Vec4(0.1,0.2,0.9, 1.0), 128, 128);
+	m_Tools.Initialize();
 
 	glutDisplayFuncUcall(&Application::StaticRender, this);
 	CallNextUpdate(this);
@@ -126,37 +108,38 @@ void Application::CreateMenu() {
 	glutCreateMenuUcall(Application::StaticMenu, this);
 
 	// Ajout des entrées dans le menu
-	glutAddMenuEntry("couleurs", MENU_OPTION_1);
-	glutAddMenuEntry("trace polygone", MENU_OPTION_2);
-	glutAddMenuEntry("trace fenetre", MENU_OPTION_3);
-	glutAddMenuEntry("fenetrage", MENU_OPTION_4);
-	glutAddMenuEntry("remplissage", MENU_OPTION_5);
-	glutAddMenuEntry("Exit", MENU_OPTION_EXIT);
+	glutAddMenuEntry("move", (int)Tools::MOVE);
+	glutAddMenuEntry("couleurs", (int)Tools::CHANGE_COLOR);
+	glutAddMenuEntry("trace polygone", (int)Tools::DRAW_POLYGONE);
+	glutAddMenuEntry("trace fenetre", (int)Tools::DRAW_WINDOW);
+	glutAddMenuEntry("fenetrage", (int)Tools::WINDOWING);
+	glutAddMenuEntry("remplissage", (int)Tools::FILLING);
+	glutAddMenuEntry("Exit", -1);
 
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 }
 
 void Application::Menu(int value)
 {
-	switch (value) {
-		case MENU_OPTION_1:
-			// a faire
+	if(value == -1) {
+		REI_INFO("Press 'Tools::EXIT'.");
+		Exit();
+		return;
+	}
+
+	auto tool = (Tools)value;
+
+	switch (tool) {
+		case Tools::CHANGE_COLOR:
+			//TODO: Handling the change of color
+			REI_INFO("Should Change Color.");
+//			auto previous = m_Tools.GetSelectedTool();
+			m_Tools.SetTool(Tools::NONE);
+			//TODO: set back to the previous tools once the color has been selected/changed.
 			break;
-		case MENU_OPTION_2:
-			// a faire
+		default:
+			m_Tools.SetTool(tool);
 			break;
-		case MENU_OPTION_3:
-			// a faire
-			break;
-		case MENU_OPTION_4:
-			// a faire
-			break;
-		case MENU_OPTION_5:
-			// a faire
-			break;
-		case MENU_OPTION_EXIT:
-			Exit();
-			return;
 	}
 
 	Redraw();
@@ -164,6 +147,7 @@ void Application::Menu(int value)
 
 void Application::Exit()
 {
+	m_Tools.Destroy();
 	glutExit();
 }
 
@@ -242,11 +226,13 @@ void Application::OnMouseButton(MouseButton button, MousePressState state, int m
 	{
 		mouseState.timePressed = GetTime();
 		mouseState.positionPressed = mousePos;
+		m_Tools.OnMouseClick(button, mouseState);
 	}
 	else
 	{
 		mouseState.timeReleased = GetTime();
 		mouseState.positionReleased = mousePos;
+		m_Tools.OnMouseRelease(button, mouseState);
 	}
 
 	auto eventIt = m_OnMouseEvents.find(button);
@@ -262,6 +248,7 @@ void Application::OnMouseButton(MouseButton button, MousePressState state, int m
 void Application::OnMouseMotion(int mouseX, int mouseY)
 {
 	m_MousePos = Vec2Int(mouseX, mouseY);
+	m_Tools.OnMouseMove(m_MousePos);
 }
 
 double Application::GetTime() const {
@@ -303,43 +290,15 @@ void Application::Render() {
 
 	const Mat4& viewProj = m_Camera.GetViewProjMatrix();
 
-	drawObj.Draw(viewProj);
-	quad.Draw(viewProj);
-	poly.Draw(viewProj);
+	m_Tools.Draw(viewProj);
 
 	glFlush();
 }
 
 void Application::Update()
 {
-	// Camera Movement
-	Vec2 movement(0.0f);
-	float frameMovement = m_CameraSpeed * m_UpdateDeltaTime;
-	if(GetKeyDown('z')) // up
+	if(m_Tools.OnUpdate(m_UpdateDeltaTime))
 	{
-		movement += Vec2(0, +1);
-	}
-
-	if(GetKeyDown('s')) // down
-	{
-		movement += Vec2(0, -1);
-	}
-
-	if(GetKeyDown('d')) // right
-	{
-		movement += Vec2(+1, 0);
-	}
-
-	if(GetKeyDown('q')) // down
-	{
-		movement += Vec2(-1, 0);
-	}
-
-	if(movement != Vec2(0.0))
-	{
-		movement = Math::Normalize(movement) * frameMovement;
-//		REI_INFO("Move of {0} units", Math::ToString(movement));
-		m_Camera.MovePosition(movement);
 		Redraw();
 	}
 }
@@ -356,4 +315,14 @@ Vec2Int Application::GetMousePos() const {
 Vec2 Application::GetInGameMousePos() const
 {
 	return m_Camera.ScreenToGameSpace(m_MousePos);
+}
+
+Vec2 Application::WorldToScreenPos(Vec2 pos) const
+{
+	return m_Camera.GameToScreenSpace(pos);
+}
+
+Vec2 Application::ScreenToWorldPos(Vec2 pos) const
+{
+	return m_Camera.ScreenToGameSpace(pos);
 }

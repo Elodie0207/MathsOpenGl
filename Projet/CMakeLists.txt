@@ -31,6 +31,9 @@ add_executable(MathsOpenGl
         include/stb_image.h
         src/Renderer/Quad.cpp
         include/Renderer/Quad.hpp
+        src/Photoshoop/Tools.cpp
+        include/Photoshoop/Tools.hpp
+        include/Input.hpp
 )
 
 target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})
