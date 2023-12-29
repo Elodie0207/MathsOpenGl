@@ -21,7 +21,9 @@
 typedef glm::vec2 Vec2;
 typedef glm::ivec2 Vec2Int;
 typedef glm::vec3 Vec3;
+typedef glm::u8vec3 Vec3UB;
 typedef glm::vec4 Vec4;
+typedef glm::u8vec4 Vec4UB;
 typedef glm::quat Quat;
 
 typedef glm::mat4 Mat4;

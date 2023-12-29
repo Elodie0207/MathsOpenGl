@@ -7,6 +7,31 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+std::shared_ptr<Texture> Texture::Create(const std::filesystem::path& path)
+{
+	return std::make_shared<Texture>(path);
+}
+std::shared_ptr<Texture> Texture::Create(Vec3 color, int width, int height)
+{
+	return std::make_shared<Texture>(color, width, height);
+}
+std::shared_ptr<Texture> Texture::Create(Vec4 color, int width, int height)
+{
+	return std::make_shared<Texture>(color, width, height);
+}
+std::shared_ptr<Texture> Texture::Create(const uint8_t* data, int width, int height, int channels)
+{
+	return std::make_shared<Texture>(data, width, height, channels);
+}
+std::shared_ptr<Texture> Texture::Create(const uint16_t* data, int width, int height, int channels)
+{
+	return std::make_shared<Texture>(data, width, height, channels);
+}
+std::shared_ptr<Texture> Texture::Create(Texture2DSpecification textureSpecs)
+{
+	return std::make_shared<Texture>(textureSpecs);
+}
+
 class TexSpecHelper
 {
 private:
@@ -238,8 +263,8 @@ public:
 			REI_ASSERT(spec.width == width,"The width set in the spec ({0}) doesn't not correspond to the image ({1}).", spec.width, width);
 			REI_ASSERT(spec.height == height,"The height set in the spec ({0}) doesn't not correspond to the image ({1}).", spec.height, height);
 			REI_ASSERT(spec.channels == channels,"The channels set in the spec ({0}) doesn't not correspond to the image ({1}).", spec.channels, channels);
-			REI_ASSERT(spec.pixelType == PixelType::PX_8, "The Pixel Type in the spec ({0}) doesn't not correspond to the image ({1})", spec.pixelType, PixelType::PX_8);
-			REI_ASSERT(spec.pixelFormat == static_cast<PixelFormat>(channels), "The Pixel Format in the spec ({0}) doesn't not correspond to the image ({1})", spec.pixelFormat, static_cast<PixelFormat>(channels));
+			REI_ASSERT(spec.pixelType == PixelType::PX_8, "The Pixel Type in the spec ({0}) doesn't not correspond to the image ({1})", (int)spec.pixelType, (int)PixelType::PX_8);
+			REI_ASSERT(spec.pixelFormat == static_cast<PixelFormat>(channels), "The Pixel Format in the spec ({0}) doesn't not correspond to the image ({1})", (int)spec.pixelFormat, channels);
 		}
 
 		if(data == nullptr) { REI_WARNING("We return a null data pointer for the texture '{0}'", spec.name); }
@@ -253,10 +278,11 @@ Texture::Texture(const std::filesystem::path& path) : m_Path(path)
 	m_TextureSpecification.name = m_Path.string();
 	m_TextureSpecification.image = m_Path;
 
-	CreateTexture();
+	Create();
+	Texture::Unbind();
 }
 
-Texture::Texture(Vec3 color, int width, int height) : pixels3(width * height, color)
+Texture::Texture(Vec3 color, int width, int height) : pixels3(width * height, Vec3UB(color.x * 255, color.y * 255, color.z * 255))
 {
 	// REI_PROFILE_FUNCTION();
 	m_TextureSpecification.name = std::to_string(m_TextureSpecification.id);
@@ -267,10 +293,11 @@ Texture::Texture(Vec3 color, int width, int height) : pixels3(width * height, co
 	m_TextureSpecification.pixelType = PX_8;
 	m_TextureSpecification.pixelFormat = PixelFormat::RGB;
 
-	CreateTexture();
+	Create();
+	Texture::Unbind();
 }
 
-Texture::Texture(Vec4 color, int width, int height) : pixels4(width * height, color)
+Texture::Texture(Vec4 color, int width, int height) : pixels4(width * height, Vec4UB(color.x * 255, color.y * 255, color.z * 255, color.w * 255))
 {
 	// REI_PROFILE_FUNCTION();
 	m_TextureSpecification.name = std::to_string(m_TextureSpecification.id);
@@ -281,7 +308,8 @@ Texture::Texture(Vec4 color, int width, int height) : pixels4(width * height, co
 	m_TextureSpecification.pixelType = PX_8;
 	m_TextureSpecification.pixelFormat = PixelFormat::RGBA;
 
-	CreateTexture();
+	Create();
+	Texture::Unbind();
 }
 
 
@@ -297,7 +325,8 @@ Texture::Texture(const uint8_t* data, int width, int height, int channels) : m_W
 	m_TextureSpecification.channels = channels;
 	m_TextureSpecification.image = data;
 
-	CreateTexture();
+	Create();
+	Texture::Unbind();
 }
 
 Texture::Texture(const uint16_t* data, int width, int height, int channels) : m_Width(width), m_Height(height), m_Channels(channels)
@@ -312,16 +341,18 @@ Texture::Texture(const uint16_t* data, int width, int height, int channels) : m_
 	m_TextureSpecification.channels = channels;
 	m_TextureSpecification.image = data;
 
-	CreateTexture();
+	Create();
+	Texture::Unbind();
 }
 
 Texture::Texture(Texture2DSpecification textureSpecs) : m_TextureSpecification(std::move(textureSpecs))
 {
 	// REI_PROFILE_FUNCTION();
-	CreateTexture();
+	Create();
+	Texture::Unbind();
 }
 
-void Texture::CreateTexture()
+void Texture::Create()
 {
 	// REI_PROFILE_FUNCTION();
 	TexSpecHelper helper(m_TextureSpecification);
@@ -333,7 +364,7 @@ void Texture::CreateTexture()
 
 	REI_ASSERT(m_TextureSpecification.channels > 0 && m_TextureSpecification.channels < 5, "The number of channel {0} is not handle at the moment.", m_TextureSpecification.channels);
 
-	GLenum internalFormat = helper.GetInternalFormat();
+	GLint internalFormat = helper.GetInternalFormat();
 	GLenum dataFormat = helper.GetFormat();
 	GLenum pixelType = helper.GetType();
 	const void* data = helper.GetData();
@@ -364,4 +395,40 @@ void Texture::Bind() const {
 void Texture::Unbind() {
 	// REI_PROFILE_FUNCTION();
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+std::vector<Vec3> Texture::GetPixels3()
+{
+	std::vector<Vec3> pixels(m_Width * m_Height);
+	auto* data = new unsigned char[m_Width * m_Height * m_Channels];
+	auto helper = TexSpecHelper(m_TextureSpecification);
+	glBindTexture(GL_TEXTURE_2D, m_RendererID);
+	glGetTexImage(GL_TEXTURE_2D, 0, helper.GetFormat(), helper.GetType(), &data);
+	for (int i = 0; i < m_Width * m_Height; i+= m_Channels)
+	{
+		int index = i / m_Channels;
+		for (int j = 0; j < 3; ++j) {
+			pixels[index][j] = (float)data[i + j] / 255.0f;
+		}
+	}
+	delete[] data;
+	return pixels;
+}
+
+std::vector<Vec4> Texture::GetPixels4()
+{
+	std::vector<Vec4> pixels(m_Width * m_Height, Vec4(1.0));
+	auto* data = new unsigned char[m_Width * m_Height * m_Channels];
+	auto helper = TexSpecHelper(m_TextureSpecification);
+	glBindTexture(GL_TEXTURE_2D, m_RendererID);
+	glGetTexImage(GL_TEXTURE_2D, 0, helper.GetFormat(), helper.GetType(), &data);
+	for (int i = 0; i < m_Width * m_Height; i+= m_Channels)
+	{
+		int index = i / m_Channels;
+		for (int j = 0; j < std::min(4, (int)m_Channels); ++j) {
+			pixels[index][j] = (float)data[i + j] / 255.0f;
+		}
+	}
+	delete[] data;
+	return pixels;
 }

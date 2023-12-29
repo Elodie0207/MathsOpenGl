@@ -29,6 +29,8 @@ add_executable(MathsOpenGl
         src/UUID.cpp
         include/UUID.hpp
         include/stb_image.h
+        src/Renderer/Quad.cpp
+        include/Renderer/Quad.hpp
 )
 
 target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})

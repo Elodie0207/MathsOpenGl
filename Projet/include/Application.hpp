@@ -15,6 +15,7 @@
 #include "Camera.hpp"
 #include "Renderer/DrawObject.hpp"
 #include "Renderer/Poly.hpp"
+#include "Renderer/Quad.hpp"
 
 enum class MouseButton
 {
@@ -122,4 +123,5 @@ private:
 
 	DrawObject drawObj = DrawObject({{0,0}, { 0, 512}, { 512, 512}, { 512, 0}});
 	Poly poly = Poly({{0, 0}, {0, 512}, {512, 512}});
+	Quad quad = Quad(Vec2(512, 512), Vec2(512, 512));
 };

@@ -37,7 +37,7 @@ private:
 	float m_ZFar = 1.0f;
 	float m_Size = 1024.0f;
 
-	Vec2 m_Position = Vec2(0.0f, 0.0f);
+	Vec2 m_Position = Vec2(512.0f, 512.0f);
 
 	Mat4 m_ViewProjMatrix, m_ViewMatrix, m_ProjMatrix;
 };

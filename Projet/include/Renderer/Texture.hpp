@@ -73,12 +73,20 @@ struct Texture2DSpecification
 class Texture
 {
 public:
+	static std::shared_ptr<Texture> Create(const std::filesystem::path& path);
+	static std::shared_ptr<Texture> Create(Vec3 color, int width, int height);
+	static std::shared_ptr<Texture> Create(Vec4 color, int width, int height);
+	static std::shared_ptr<Texture> Create(const uint8_t* data, int width, int height, int channels);
+	static std::shared_ptr<Texture> Create(const uint16_t* data, int width, int height, int channels);
+	static std::shared_ptr<Texture> Create(Texture2DSpecification textureSpecs);
+public:
 	Texture(const std::filesystem::path& path);
 	Texture(Vec3 color, int width, int height);
 	Texture(Vec4 color, int width, int height);
 	Texture(const uint8_t* data, int width, int height, int channels);
 	Texture(const uint16_t* data, int width, int height, int channels);
 	Texture(Texture2DSpecification textureSpecs);
+public:
 	~Texture();
 
 	inline uint32_t GetWidth() const {return m_Width; }
@@ -89,14 +97,17 @@ public:
 
 	void Bind() const;
 	static void Unbind();
+
+	std::vector<Vec3> GetPixels3();
+	std::vector<Vec4> GetPixels4();
 private:
-	void CreateTexture();
+	void Create();
 private:
 	UUID id;
 	Texture2DSpecification m_TextureSpecification;
 	std::filesystem::path m_Path;
 	uint32_t m_Width, m_Height, m_Channels;
 	uint32_t m_RendererID;
-	std::vector<Vec3> pixels3;
-	std::vector<Vec3> pixels4;
+	std::vector<Vec3UB> pixels3;
+	std::vector<Vec4UB> pixels4;
 };

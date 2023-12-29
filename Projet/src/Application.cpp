@@ -92,8 +92,6 @@ Application::Application(ApplicationSpecification appSpec) : m_AppSpec(std::move
 	REI_INFO("  Vendor: {0}", (const char*)glGetString(GL_VENDOR));
 	REI_INFO("  Renderer: {0}", (const char*)glGetString(GL_RENDERER));
 	REI_INFO("  Version: {0}", (const char*)glGetString(GL_VERSION));
-	REI_INFO("  Shader Version: {0}", (const char*)glGetString(GL_SHADE_MODEL));
-
 
 	Initialize();
 }
@@ -104,7 +102,10 @@ Application::~Application()
 }
 
 void Application::Initialize() {
+	glEnable(GL_TEXTURE_2D);
 	glLineWidth(5.0f);
+
+	quad.Texture = Texture::Create(Vec4(0.1,0.2,0.9, 1.0), 128, 128);
 
 	glutDisplayFuncUcall(&Application::StaticRender, this);
 	CallNextUpdate(this);
@@ -303,6 +304,7 @@ void Application::Render() {
 	const Mat4& viewProj = m_Camera.GetViewProjMatrix();
 
 	drawObj.Draw(viewProj);
+	quad.Draw(viewProj);
 	poly.Draw(viewProj);
 
 	glFlush();
