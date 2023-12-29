@@ -17,6 +17,8 @@ add_executable(MathsOpenGl
         include/Core.hpp
         src/Parameters.cpp
         include/Parameters.hpp
+        src/Camera.cpp
+        include/Camera.hpp
 )
 
 target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})
@@ -30,5 +32,6 @@ elseif(CMAKE_BUILD_TYPE MATCHES "[Rr][Ee][Ll][Ee][Aa][Ss][Ee]")
 elseif(CMAKE_BUILD_TYPE MATCHES "[Dd][Ii][Ss][Tt]")
     target_compile_definitions(MathsOpenGl PUBLIC REI_DIST)
 endif()
+target_compile_definitions(MathsOpenGl PUBLIC REI_SIMPLE_FUNC)
 
 target_link_libraries(MathsOpenGl PUBLIC glfw ${OPENGL_gl_LIBRARY} freeglut_static glm spdlog::spdlog_header_only)
