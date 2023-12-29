@@ -1,15 +1,17 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.26)
 project(MathsOpenGl)
 
 set(CMAKE_CXX_STANDARD 17)
-find_package(OpenGL REQUIRED)
-link_directories(${OPENGL_gl_LIBRARY})
+set(CMAKE_CXX_STANDARD_COMPUTED_DEFAULT "17")
 
-include_directories(../libs/glfw/include)
-include_directories(../libs/glut/include)
+add_executable(MathsOpenGl
+        src/main.cpp
+        include/Math.cpp
+        include/Math.hpp
+)
 
-link_directories(../libs/glfw/lib-static-ucrt)
-link_directories(../libs/glut/lib/x64)
+target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})
+target_include_directories(MathsOpenGl PRIVATE src/)
+target_compile_features(MathsOpenGl PUBLIC cxx_std_17)
 
-add_executable(MathsOpenGl main.cpp)
-target_link_libraries(MathsOpenGl glfw3 ${OPENGL_gl_LIBRARY} freeglut)
+target_link_libraries(MathsOpenGl PUBLIC glfw ${OPENGL_gl_LIBRARY} freeglut_static glm)
