@@ -30,18 +30,18 @@ private:
 #ifdef REI_DEBUG
 //  spdlog::source_loc(__FILE__, __LINE__, __FUNCTION__ )
 
-#define REI_TRACE(...)       ::Voxymore::Core::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::trace, __VA_ARGS__)
-#define REI_INFO(...)        ::Voxymore::Core::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::info, __VA_ARGS__)
-#define REI_WARNING(...)     ::Voxymore::Core::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::warn, __VA_ARGS__)
-#define REI_ERROR(...)       ::Voxymore::Core::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::err, __VA_ARGS__)
-#define REI_CRITICAL(...)    ::Voxymore::Core::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::critical, __VA_ARGS__)
+#define REI_TRACE(...)       ::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::trace, __VA_ARGS__)
+#define REI_INFO(...)        ::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::info, __VA_ARGS__)
+#define REI_WARNING(...)     ::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::warn, __VA_ARGS__)
+#define REI_ERROR(...)       ::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::err, __VA_ARGS__)
+#define REI_CRITICAL(...)    ::Log::GetClientLogger()->log(spdlog::source_loc{__FILE__, __LINE__, REI_FUNC}, spdlog::level::critical, __VA_ARGS__)
 
 //
-//#define REI_TRACE(...)       ::Voxymore::Core::Log::GetClientLogger()->trace(__VA_ARGS__)
-//#define REI_INFO(...)        ::Voxymore::Core::Log::GetClientLogger()->info(__VA_ARGS__)
-//#define REI_WARNING(...)     ::Voxymore::Core::Log::GetClientLogger()->warn(__VA_ARGS__)
-//#define REI_ERROR(...)       ::Voxymore::Core::Log::GetClientLogger()->error(__VA_ARGS__)
-//#define REI_CRITICAL(...)    ::Voxymore::Core::Log::GetClientLogger()->critical(__VA_ARGS__)
+//#define REI_TRACE(...)       ::Log::GetClientLogger()->trace(__VA_ARGS__)
+//#define REI_INFO(...)        ::Log::GetClientLogger()->info(__VA_ARGS__)
+//#define REI_WARNING(...)     ::Log::GetClientLogger()->warn(__VA_ARGS__)
+//#define REI_ERROR(...)       ::Log::GetClientLogger()->error(__VA_ARGS__)
+//#define REI_CRITICAL(...)    ::Log::GetClientLogger()->critical(__VA_ARGS__)
 
 #else
 
