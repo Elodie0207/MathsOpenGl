@@ -6,12 +6,29 @@ set(CMAKE_CXX_STANDARD_COMPUTED_DEFAULT "17")
 
 add_executable(MathsOpenGl
         src/main.cpp
-        include/Math.cpp
+        src/Math.cpp
         include/Math.hpp
+        src/Application.cpp
+        include/Application.hpp
+        include/Macros.hpp
+        src/Logger.cpp
+        include/Logger.hpp
+        include/Assert.hpp
+        include/Core.hpp
+        src/Parameters.cpp
+        include/Parameters.hpp
 )
 
 target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})
 target_include_directories(MathsOpenGl PRIVATE src/)
 target_compile_features(MathsOpenGl PUBLIC cxx_std_17)
 
-target_link_libraries(MathsOpenGl PUBLIC glfw ${OPENGL_gl_LIBRARY} freeglut_static glm)
+if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
+    target_compile_definitions(MathsOpenGl PUBLIC REI_DEBUG)
+elseif(CMAKE_BUILD_TYPE MATCHES "[Rr][Ee][Ll][Ee][Aa][Ss][Ee]")
+    target_compile_definitions(MathsOpenGl PUBLIC REI_RELEASE)
+elseif(CMAKE_BUILD_TYPE MATCHES "[Dd][Ii][Ss][Tt]")
+    target_compile_definitions(MathsOpenGl PUBLIC REI_DIST)
+endif()
+
+target_link_libraries(MathsOpenGl PUBLIC glfw ${OPENGL_gl_LIBRARY} freeglut_static glm spdlog::spdlog_header_only)

@@ -23,4 +23,7 @@ option(GLFW_BUILD_TESTS "" OFF)
 option(GLFW_BUILD_DOCS "" OFF)
 add_subdirectory(libs/glfw-3.3.9)
 
+add_subdirectory(libs/spdlog-1.12.0)
+
+
 add_subdirectory(Projet)
