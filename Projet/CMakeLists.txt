@@ -19,6 +19,11 @@ add_executable(MathsOpenGl
         include/Parameters.hpp
         src/Camera.cpp
         include/Camera.hpp
+        src/Renderer/Poly.cpp
+        include/Renderer/Poly.hpp
+        include/SystemHelper.hpp
+        src/Renderer/DrawObject.cpp
+        include/Renderer/DrawObject.hpp
 )
 
 target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})

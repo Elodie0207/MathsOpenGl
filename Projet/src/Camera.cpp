@@ -66,3 +66,33 @@ void Camera::UpdateProjMatrix(bool updateViewProj) {
 void Camera::UpdateViewProjMatrix() {
 	m_ViewProjMatrix = m_ProjMatrix * m_ViewMatrix;
 }
+
+Vec2 Camera::ScreenToGameSpace(Vec2 pos) const {
+
+	float y = 1 - static_cast<float>(pos.y) / (float)m_Height;
+	y -= 0.5f;
+	y *= GetSize();
+	y += GetPosition().y;
+
+	float x = static_cast<float>(pos.x) / (float)m_Width;
+	x -= 0.5f;
+	x *= (GetSize() * GetAspectRatio());
+	x += GetPosition().x;
+
+	return {x, y};
+}
+
+Vec2 Camera::GameToScreenSpace(Vec2 pos) const {
+
+	float y = pos.y - GetPosition().y;
+	y /= GetSize();
+	y += 0.5f;
+	y = (1 - y) * m_Height;
+
+	float x = pos.x - GetPosition().x;
+	x /= GetSize() * GetAspectRatio();
+	x += 0.5f;
+	x = x * m_Width;
+
+	return {x, y};
+}

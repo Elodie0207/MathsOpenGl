@@ -2,9 +2,6 @@
 
 #include "Application.hpp"
 
-#include <GLFW/glfw3.h>
-#include <GL/freeglut.h>
-
 
 int main(int argc, char** argv) {
     Log::Init();

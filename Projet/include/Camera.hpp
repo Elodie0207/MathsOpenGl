@@ -19,6 +19,13 @@ public:
 	Mat4 GetViewProjMatrix() const;
 	Mat4 GetViewMatrix() const;
 	Mat4 GetProjMatrix() const;
+
+
+	inline float GetAspectRatio() const {return m_AspectRatio; }
+	inline float GetSize() const {return m_Size; }
+
+	Vec2 ScreenToGameSpace(Vec2 pos) const;
+	Vec2 GameToScreenSpace(Vec2 pos) const;
 private:
 	void UpdateProjMatrix(bool updateViewProj = true);
 	void UpdateViewMatrix(bool updateViewProj = true);
@@ -28,9 +35,9 @@ private:
 	float m_AspectRatio;
 	float m_ZNear = 0.0f;
 	float m_ZFar = 1.0f;
-	float m_Size = 1.0f;
+	float m_Size = 1024.0f;
 
-	Vec2 m_Position = Vec2(0.0f);
+	Vec2 m_Position = Vec2(0.0f, 0.0f);
 
 	Mat4 m_ViewProjMatrix, m_ViewMatrix, m_ProjMatrix;
 };

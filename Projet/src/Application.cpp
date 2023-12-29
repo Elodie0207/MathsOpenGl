@@ -24,11 +24,12 @@ ApplicationSpecification::ApplicationSpecification(int argc, char **argv) : argc
 void Application::StaticRender(void* appPtr)
 {
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-	REI_INFO("New Rendering");
+//	REI_INFO("New Rendering");
 	Application* app = static_cast<Application *>(appPtr);
 	app->UpdateDeltaTime(app->m_RenderTime, app->m_RenderDeltaTime);
 	app->Render();
 }
+
 void Application::StaticUpdate(int timerId, void* appPtr)
 {
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
@@ -37,26 +38,31 @@ void Application::StaticUpdate(int timerId, void* appPtr)
 	app->Update();
 	CallNextUpdate(appPtr);
 }
+
 void Application::StaticMenu(int value, void* appPtr)
 {
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
 	static_cast<Application*>(appPtr)->Menu(value);
 }
+
 void Application::StaticOnResize(int width, int height, void *appPtr)
 {
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
 	static_cast<Application*>(appPtr)->OnResize(width, height);
 }
+
 void Application::StaticOnKeyDown(unsigned char key, int mouseX, int mouseY, void* appPtr)
 {
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
 	static_cast<Application*>(appPtr)->OnKeyDown((char)key, mouseY, mouseY);
 }
+
 void Application::StaticOnKeyUp(unsigned char key, int mouseX, int mouseY, void* appPtr)
 {
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
 	static_cast<Application*>(appPtr)->OnKeyUp((char)key, mouseY, mouseY);
 }
+
 void Application::StaticOnMouseButton(int button, int state, int mouseX, int mouseY, void *appPtr)
 {
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
@@ -72,12 +78,22 @@ void Application::StaticOnMouseMotion(int mouseX, int mouseY, void* appPtr)
 
 Application::Application(ApplicationSpecification appSpec) : m_AppSpec(std::move(appSpec)), m_Camera(m_AppSpec.width, m_AppSpec.height)
 {
+	drawObj.m_Color = Vec4(0.8,0.2,0.3,1);
+	poly.m_Color = Vec4(0.2,0.3,0.8,1);
+
 	REI_ASSERT(m_AppSpec.width > 0 && m_AppSpec.height > 0, "The Aspect Ration ({0}/{1}) is no valid.", m_AppSpec.width, m_AppSpec.height);
 	glutInit(&m_AppSpec.argc, m_AppSpec.argv);
 	glutInitWindowSize(m_AppSpec.width, m_AppSpec.height);
 	glutCreateWindow(m_AppSpec.name.c_str());
 
 	s_MainApp = this;
+
+	REI_INFO("OpenGL Info:");
+	REI_INFO("  Vendor: {0}", (const char*)glGetString(GL_VENDOR));
+	REI_INFO("  Renderer: {0}", (const char*)glGetString(GL_RENDERER));
+	REI_INFO("  Version: {0}", (const char*)glGetString(GL_VERSION));
+	REI_INFO("  Shader Version: {0}", (const char*)glGetString(GL_SHADE_MODEL));
+
 
 	Initialize();
 }
@@ -88,6 +104,8 @@ Application::~Application()
 }
 
 void Application::Initialize() {
+	glLineWidth(5.0f);
+
 	glutDisplayFuncUcall(&Application::StaticRender, this);
 	CallNextUpdate(this);
 	glutReshapeFuncUcall(&Application::StaticOnResize, this);
@@ -139,7 +157,8 @@ void Application::Menu(int value)
 			Exit();
 			return;
 	}
-	glutPostRedisplay();// Demande à GLUT de redessiner la fenêtre
+
+	Redraw();
 }
 
 void Application::Exit()
@@ -149,9 +168,9 @@ void Application::Exit()
 
 void Application::OnResize(int width, int height)
 {
-	m_AppSpec.width = width;
-	m_AppSpec.height = height;
-	m_Camera.ChangeAspectRatio(width, height);
+	m_AppSpec.width = width > 0 ? width : 1;
+	m_AppSpec.height = height > 0 ? height : 1;
+	m_Camera.ChangeAspectRatio(m_AppSpec.width, m_AppSpec.height);
 }
 
 void Application::UpdateDeltaTime(double& Time, float& DeltaTime)
@@ -242,7 +261,6 @@ void Application::OnMouseButton(MouseButton button, MousePressState state, int m
 void Application::OnMouseMotion(int mouseX, int mouseY)
 {
 	m_MousePos = Vec2Int(mouseX, mouseY);
-	REI_INFO("Mouse Position : {0}", Math::ToString(m_MousePos));
 }
 
 double Application::GetTime() const {
@@ -281,7 +299,11 @@ void Application::Render() {
 	auto clearColor = Parameters::GetClearColor();
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// Rendering
+
+	const Mat4& viewProj = m_Camera.GetViewProjMatrix();
+
+	drawObj.Draw(viewProj);
+	poly.Draw(viewProj);
 
 	glFlush();
 }
@@ -291,14 +313,45 @@ void Application::Update()
 	// Camera Movement
 	Vec2 movement(0.0f);
 	float frameMovement = m_CameraSpeed * m_UpdateDeltaTime;
-	if(GetKeyDown('z')) movement += Vec2(0, +1);
-	if(GetKeyDown('s')) movement += Vec2(0, -1);
-	if(GetKeyDown('q')) movement += Vec2(+1, 0);
-	if(GetKeyDown('d')) movement += Vec2(-1, 0);
+	if(GetKeyDown('z')) // up
+	{
+		movement += Vec2(0, +1);
+	}
+
+	if(GetKeyDown('s')) // down
+	{
+		movement += Vec2(0, -1);
+	}
+
+	if(GetKeyDown('d')) // right
+	{
+		movement += Vec2(+1, 0);
+	}
+
+	if(GetKeyDown('q')) // down
+	{
+		movement += Vec2(-1, 0);
+	}
+
 	if(movement != Vec2(0.0))
 	{
 		movement = Math::Normalize(movement) * frameMovement;
-		REI_INFO("Move of {0} units", Math::ToString(movement));
+//		REI_INFO("Move of {0} units", Math::ToString(movement));
 		m_Camera.MovePosition(movement);
+		Redraw();
 	}
+}
+
+void Application::Redraw()
+{
+	glutPostRedisplay();
+}
+
+Vec2Int Application::GetMousePos() const {
+	return m_MousePos;
+}
+
+Vec2 Application::GetInGameMousePos() const
+{
+	return m_Camera.ScreenToGameSpace(m_MousePos);
 }

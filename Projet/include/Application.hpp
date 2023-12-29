@@ -13,6 +13,8 @@
 #include <vector>
 
 #include "Camera.hpp"
+#include "Renderer/DrawObject.hpp"
+#include "Renderer/Poly.hpp"
 
 enum class MouseButton
 {
@@ -89,6 +91,7 @@ private:
 	void Initialize();
 	void CreateMenu();
 	void Exit();
+	void Redraw();
 
 	void Render();
 	void Update();
@@ -99,11 +102,13 @@ private:
 	KeyState GetKeyState(char key) const;
 	bool GetMouseDown(MouseButton key) const;
 	MouseState GetMouseState(MouseButton key) const;
-	inline const Vec2Int& GetMousePos() const {return m_MousePos;}
+	Vec2Int GetMousePos() const;
+	Vec2 GetInGameMousePos() const;
+
 private:
     ApplicationSpecification m_AppSpec;
 	Camera m_Camera;
-	float m_CameraSpeed = 1.0f;
+	float m_CameraSpeed = 50.0f;
 	double m_RenderTime = 0; float m_RenderDeltaTime = 0.0166f;
 	double m_UpdateTime = 0; float m_UpdateDeltaTime = 0.0166f;
 
@@ -114,4 +119,7 @@ private:
 	std::vector<std::function<void(char, int, int)>> m_OnKeyPressEvents;
 	std::vector<std::function<void(char, int, int)>> m_OnKeyReleaseEvents;
 	std::unordered_map<MouseButton, std::vector<std::function<void(const MouseState&)>>> m_OnMouseEvents;
+
+	DrawObject drawObj = DrawObject({{0,0}, { 0, 512}, { 512, 512}, { 512, 0}});
+	Poly poly = Poly({{0, 0}, {0, 512}, {512, 512}});
 };
