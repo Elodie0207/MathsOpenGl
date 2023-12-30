@@ -17,6 +17,8 @@
 #include <cmath>
 #include <cstdint>
 #include <iostream>
+#include <vector>
+#include <limits>
 
 typedef glm::vec2 Vec2;
 typedef glm::ivec2 Vec2Int;
@@ -27,6 +29,8 @@ typedef glm::u8vec4 Vec4UB;
 typedef glm::quat Quat;
 
 typedef glm::mat4 Mat4;
+
+typedef glm::dvec2 Point;
 
 class Math
 {
@@ -55,8 +59,11 @@ public:
 	static Mat4 TRS(Vec3 position, Quat Rotation, Vec3 scale);
 
 	static Mat4 Inverse(Mat4 mat);
+	static bool CyrusBeck(double X1, double Y1, double X2, double Y2, std::vector<Point> Poly, std::vector<Point> Normale, int Nbsom)
 
 };
+
+
 
 inline std::ostream& operator << (std::ostream & os, const Mat4& value){
 	return os << Math::ToString(value);
