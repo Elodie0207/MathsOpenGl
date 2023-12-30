@@ -59,7 +59,7 @@ public:
 	static Mat4 TRS(Vec3 position, Quat Rotation, Vec3 scale);
 
 	static Mat4 Inverse(Mat4 mat);
-	static bool CyrusBeck(double X1, double Y1, double X2, double Y2, std::vector<Point> Poly, std::vector<Point> Normale, int Nbsom)
+	static bool CyrusBeck(double X1, double Y1, double X2, double Y2, std::vector<Point> Poly, std::vector<Point> Normale, int Nbsom);
 
 };
 
