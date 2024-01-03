@@ -82,3 +82,68 @@ bool Math::CyrusBeck(double X1, double Y1, double X2, double Y2, std::vector<Poi
 		return false;
 	}
 }
+
+double Math:: coupe(const Point& a, const Point& b, const Point& c) {
+    return (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
+}
+
+
+Point Math:: intersection(const Point& a, const Point& b, const Point& c, const Point& d) {
+    double ua = ((d.x - c.x) * (a.y - c.y) - (d.y - c.y) * (a.x - c.x)) /
+                ((d.y - c.y) * (b.x - a.x) - (d.x - c.x) * (b.y - a.y));
+    Point intersection_point = {a.x + ua * (b.x - a.x), a.y + ua * (b.y - a.y)};
+    return intersection_point;
+}
+
+
+std::vector<Point> Math::sutherlandHodgman(std::vector<Point> PL, const std::vector<Point>& PW) {
+    std::vector<Point> PS;
+    for (size_t i = 0; i < PW.size() - 1; ++i) {
+        size_t N2 = 0;
+        PS.clear();
+        Point S, F, I;
+        for (size_t j = 0; j < PL.size(); ++j) {
+            if (j == 0) {
+                F = PL[j];
+            } else {
+                if (coupe(S, PL[j], PW[i]) >= 0) {
+                    if (coupe(S, PL[j], PW[i + 1]) < 0) {
+                        I = intersection(S, PL[j], PW[i], PW[i + 1]);
+                        PS.push_back(I);
+                        ++N2;
+                    }
+                } else {
+                    if (coupe(S, PL[j], PW[i + 1]) >= 0) {
+                        I = intersection(S, PL[j], PW[i], PW[i + 1]);
+                        PS.push_back(I);
+                        ++N2;
+                    }
+                }
+            }
+            S = PL[j];
+            if (coupe(S, PW[i], PW[i + 1]) >= 0) {
+                PS.push_back(S);
+                ++N2;
+            }
+        }
+        if (N2 > 0) {
+            if (coupe(S, F, PW[i]) >= 0) {
+                if (coupe(S, F, PW[i + 1]) < 0) {
+                    I = intersection(S, F, PW[i], PW[i + 1]);
+                    PS.push_back(I);
+                    ++N2;
+                }
+            } else {
+                if (coupe(S, F, PW[i + 1]) >= 0) {
+                    I = intersection(S, F, PW[i], PW[i + 1]);
+                    PS.push_back(I);
+                    ++N2;
+                }
+            }
+            PL.clear();
+            PL = PS;
+
+        }
+    }
+    return PS;
+}

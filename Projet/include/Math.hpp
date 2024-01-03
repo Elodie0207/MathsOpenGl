@@ -60,7 +60,9 @@ public:
 
 	static Mat4 Inverse(Mat4 mat);
 	static bool CyrusBeck(double X1, double Y1, double X2, double Y2, std::vector<Point> Poly, std::vector<Point> Normale, int Nbsom);
-
+    static double coupe(const Point& a, const Point& b, const Point& c);
+    static Point intersection(const Point& a, const Point& b, const Point& c, const Point& d);
+    static std::vector<Point> sutherlandHodgman(std::vector<Point> PL, const std::vector<Point>& PW);
 };
 
 
