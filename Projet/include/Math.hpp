@@ -4,7 +4,7 @@
 
 #pragma once
 
-#define GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL 1
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
