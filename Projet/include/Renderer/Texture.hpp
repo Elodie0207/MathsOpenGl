@@ -73,12 +73,12 @@ struct Texture2DSpecification
 class Texture
 {
 public:
-	static std::shared_ptr<Texture> Create(const std::filesystem::path& path);
-	static std::shared_ptr<Texture> Create(Vec3 color, int width, int height);
-	static std::shared_ptr<Texture> Create(Vec4 color, int width, int height);
-	static std::shared_ptr<Texture> Create(const uint8_t* data, int width, int height, int channels);
-	static std::shared_ptr<Texture> Create(const uint16_t* data, int width, int height, int channels);
-	static std::shared_ptr<Texture> Create(Texture2DSpecification textureSpecs);
+	static Ref<Texture> Create(const std::filesystem::path& path);
+	static Ref<Texture> Create(Vec3 color, int width, int height);
+	static Ref<Texture> Create(Vec4 color, int width, int height);
+	static Ref<Texture> Create(const uint8_t* data, int width, int height, int channels);
+	static Ref<Texture> Create(const uint16_t* data, int width, int height, int channels);
+	static Ref<Texture> Create(Texture2DSpecification textureSpecs);
 public:
 	Texture(const std::filesystem::path& path);
 	Texture(Vec3 color, int width, int height);

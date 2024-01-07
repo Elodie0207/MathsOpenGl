@@ -34,6 +34,7 @@ add_executable(MathsOpenGl
         src/Photoshoop/Tools.cpp
         include/Photoshoop/Tools.hpp
         include/Input.hpp
+        include/SmartPtr.hpp
 )
 
 target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})

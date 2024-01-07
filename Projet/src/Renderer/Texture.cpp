@@ -7,27 +7,27 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-std::shared_ptr<Texture> Texture::Create(const std::filesystem::path& path)
+Ref<Texture> Texture::Create(const std::filesystem::path& path)
 {
 	return std::make_shared<Texture>(path);
 }
-std::shared_ptr<Texture> Texture::Create(Vec3 color, int width, int height)
+Ref<Texture> Texture::Create(Vec3 color, int width, int height)
 {
 	return std::make_shared<Texture>(color, width, height);
 }
-std::shared_ptr<Texture> Texture::Create(Vec4 color, int width, int height)
+Ref<Texture> Texture::Create(Vec4 color, int width, int height)
 {
 	return std::make_shared<Texture>(color, width, height);
 }
-std::shared_ptr<Texture> Texture::Create(const uint8_t* data, int width, int height, int channels)
+Ref<Texture> Texture::Create(const uint8_t* data, int width, int height, int channels)
 {
 	return std::make_shared<Texture>(data, width, height, channels);
 }
-std::shared_ptr<Texture> Texture::Create(const uint16_t* data, int width, int height, int channels)
+Ref<Texture> Texture::Create(const uint16_t* data, int width, int height, int channels)
 {
 	return std::make_shared<Texture>(data, width, height, channels);
 }
-std::shared_ptr<Texture> Texture::Create(Texture2DSpecification textureSpecs)
+Ref<Texture> Texture::Create(Texture2DSpecification textureSpecs)
 {
 	return std::make_shared<Texture>(textureSpecs);
 }
