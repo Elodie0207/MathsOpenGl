@@ -19,6 +19,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <string>
 
 typedef glm::vec2 Vec2;
 typedef glm::ivec2 Vec2Int;
@@ -65,6 +66,19 @@ public:
     static std::vector<Point> sutherlandHodgman(std::vector<Point> PL, const std::vector<Point>& PW);
 };
 
+template<> inline std::string Math::ToString(const float& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const double& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const long double& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const unsigned char& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const unsigned short& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const unsigned int& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const unsigned long int& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const unsigned long long int& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const signed char& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const signed short& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const signed int& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const signed long int& value) { return std::to_string(value); }
+template<> inline std::string Math::ToString(const signed long long int& value) { return std::to_string(value); }
 
 
 inline std::ostream& operator << (std::ostream & os, const Mat4& value){
