@@ -33,7 +33,7 @@ ToolsHandler::~ToolsHandler()
 void ToolsHandler::Initialize() {
 	drawObj.m_Color = Vec4(0.8,0.2,0.3,1);
 	polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
-	quad.Texture = Texture::Create(Vec4(0.1,0.2,0.9, 1.0), 128, 128);
+	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
 }
 
 void ToolsHandler::Destroy() {
@@ -49,26 +49,41 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 
 		if (m_App->GetKeyDown('z')) // up
 		{
-			movement += Vec2(0, +1);
+			movement += Vec2(0, +frameMovement);
+		}
+		else if (m_App->GetKeyDown('Z')) // up
+		{
+			movement += Vec2(0, +(frameMovement * 2));
 		}
 
 		if (m_App->GetKeyDown('s')) // down
 		{
-			movement += Vec2(0, -1);
+			movement += Vec2(0, -frameMovement);
+		}
+		else if (m_App->GetKeyDown('S')) // down
+		{
+			movement += Vec2(0, -(frameMovement * 2));
 		}
 
 		if (m_App->GetKeyDown('d')) // right
 		{
-			movement += Vec2(+1, 0);
+			movement += Vec2(+frameMovement, 0);
+		}
+		else if (m_App->GetKeyDown('D')) // right
+		{
+			movement += Vec2(+(frameMovement * 2), 0);
 		}
 
 		if (m_App->GetKeyDown('q')) // down
 		{
-			movement += Vec2(-1, 0);
+			movement += Vec2(-frameMovement, 0);
+		}
+		else if (m_App->GetKeyDown('Q')) // down
+		{
+			movement += Vec2(-(frameMovement * 2), 0);
 		}
 
 		if (movement != Vec2(0.0)) {
-			movement = Math::Normalize(movement) * frameMovement;
 			m_App->GetCamera().MovePosition(movement);
 			return true;
 		}
@@ -95,6 +110,12 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 				return true;
 			}
 			break;
+		case Tools::FILLING:
+		{
+			if(mouse == MouseButton::Left && state.pressed) {
+				m_App->WriteScreenPixel(state.positionPressed, Vec4(.8, .1, .2, 1));
+			}
+		}
 	}
 	return false;
 }

@@ -35,6 +35,12 @@ void Camera::MovePosition(const Vec2 &movement) {
 	UpdateViewMatrix();
 }
 
+void Camera::SetSize(float size)
+{
+	m_Size = size;
+	UpdateProjMatrix();
+}
+
 Mat4 Camera::GetViewMatrix() const {
 	return m_ViewMatrix;
 }

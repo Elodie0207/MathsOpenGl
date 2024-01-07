@@ -65,12 +65,22 @@ void Application::StaticOnMouseMotion(int mouseX, int mouseY, void* appPtr)
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
 	static_cast<Application *>(appPtr)->OnMouseMotion(mouseX, mouseY);
 }
+void Application::StaticOnMouseWheel(int wheel, int direction, int mouseX, int mouseY, void* appPtr)
+{
+	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
+	static_cast<Application *>(appPtr)->OnMouseWheel(wheel, direction, mouseX, mouseY);
+}
 
-Application::Application(ApplicationSpecification appSpec) : m_AppSpec(std::move(appSpec)), m_Camera(m_AppSpec.width, m_AppSpec.height), m_Tools(this)
+Application::Application(ApplicationSpecification appSpec) :
+	m_AppSpec(std::move(appSpec)),
+	m_Camera(m_AppSpec.width, m_AppSpec.height),
+	m_Tools(this),
+	m_TexWidth(m_AppSpec.width),
+	m_TexHeight(m_AppSpec.height)
 {
 	REI_ASSERT(m_AppSpec.width > 0 && m_AppSpec.height > 0, "The Aspect Ration ({0}/{1}) is no valid.", m_AppSpec.width, m_AppSpec.height);
 	glutInit(&m_AppSpec.argc, m_AppSpec.argv);
-	glutInitWindowSize(m_AppSpec.width, m_AppSpec.height);
+	glutInitWindowSize(static_cast<int>(m_AppSpec.width), static_cast<int>(m_AppSpec.height));
 	glutCreateWindow(m_AppSpec.name.c_str());
 
 	REI_INFO("OpenGL Info:");
@@ -91,14 +101,17 @@ void Application::Initialize() {
 	m_Tools.Initialize();
 
 	glutDisplayFuncUcall(&Application::StaticRender, this);
-	CallNextUpdate(this);
+	glutTimerFuncUcall(1000 / 60, &Application::StaticUpdate, 0, this);;
 	glutReshapeFuncUcall(&Application::StaticOnResize, this);
 	glutKeyboardFuncUcall(&Application::StaticOnKeyDown, this);
 	glutKeyboardUpFuncUcall(&Application::StaticOnKeyUp, this);
 	glutMouseFuncUcall(&Application::StaticOnMouseButton, this);
 	glutMotionFuncUcall(&Application::StaticOnMouseMotion, this);
 	glutPassiveMotionFuncUcall(&Application::StaticOnMouseMotion, this);
+	glutMouseWheelFuncUcall(&Application::StaticOnMouseWheel, this);
 	CreateMenu();
+
+	CreateTextures();
 }
 
 void Application::Run() {
@@ -157,6 +170,8 @@ void Application::OnResize(int width, int height)
 	m_AppSpec.width = width > 0 ? width : 1;
 	m_AppSpec.height = height > 0 ? height : 1;
 	m_Camera.ChangeAspectRatio(m_AppSpec.width, m_AppSpec.height);
+	glViewport(0,0,m_AppSpec.width, m_AppSpec.height);
+	Redraw();
 }
 
 void Application::UpdateDeltaTime(double& Time, float& DeltaTime)
@@ -261,6 +276,16 @@ void Application::OnMouseMotion(int mouseX, int mouseY)
 	}
 }
 
+void Application::OnMouseWheel(int wheel, int direction, int mouseX, int mouseY)
+{
+	float multiplier = 0.9f;
+	if(direction < 0) multiplier = 1.0f/multiplier;
+	float initialSize = m_Camera.GetSize();
+	float size = initialSize * multiplier;
+	m_Camera.SetSize(size);
+	Redraw();
+}
+
 double Application::GetTime() const {
 	return glutGet(GLUT_ELAPSED_TIME);
 }
@@ -300,7 +325,12 @@ void Application::Render() {
 
 	const Mat4& viewProj = m_Camera.GetViewProjMatrix();
 
-	m_Tools.Draw(viewProj);
+	for(auto& quad : m_TextureObjects)
+	{
+		quad.Draw(viewProj);
+	}
+
+//	m_Tools.Draw(viewProj);
 
 	glFlush();
 }
@@ -335,4 +365,133 @@ Vec2 Application::WorldToScreenPos(Vec2 pos) const
 Vec2 Application::ScreenToWorldPos(Vec2 pos) const
 {
 	return m_Camera.ScreenToGameSpace(pos);
+}
+
+void Application::WriteScreenPixel(Vec2Int screenPos, Vec4 color01)
+{
+	Vec2 worldPos = ScreenToWorldPos(screenPos);
+	WriteWorldPixel(worldPos, color01);
+}
+
+void Application::WriteWorldPixel(Vec2 worldPos, Vec4 color01)
+{
+	auto info = GetTextureInfo(worldPos);
+	auto& index = info.Index;
+	auto& pixel = info.Pixel;
+	Ref<Texture> texture;
+
+	if(!HasTexture(index))
+	{
+		texture = CreateTexture(index);
+	}
+	else
+	{
+		texture = GetTexture(index);
+	}
+
+	texture->SetPixel4(pixel, color01);
+}
+
+Vec4 Application::ReadScreenPixel(Vec2Int screenPos)
+{
+	Vec2 worldPos = ScreenToWorldPos(screenPos);
+	return ReadWorldPixel(worldPos);
+}
+
+Vec4 Application::ReadWorldPixel(Vec2 worldPos)
+{
+	auto info = GetTextureInfo(worldPos);
+	auto& index = info.Index;
+	auto& pixel = info.Pixel;
+	Ref<Texture> texture;
+
+	if(!HasTexture(index))
+	{
+		texture = CreateTexture(index);
+	}
+	else
+	{
+		texture = GetTexture(index);
+	}
+
+	return texture->GetPixel4(pixel);
+}
+
+void Application::CreateTextures()
+{
+//	CreateTexture(Vec2Int{-1,-1});
+//	CreateTexture(Vec2Int{-1,+0});
+//	CreateTexture(Vec2Int{-1,+1});
+//	CreateTexture(Vec2Int{+0,-1});
+	CreateTexture(Vec2Int{+0,+0});
+//	CreateTexture(Vec2Int{+0,+1});
+//	CreateTexture(Vec2Int{+1,-1});
+//	CreateTexture(Vec2Int{+1,+0});
+//	CreateTexture(Vec2Int{+1,+1});
+}
+Ref<Texture> Application::CreateTexture() {
+//	Vec4 color = Parameters::GetClearColor();
+	Vec4 color = {1,1,1,1};
+	Texture2DSpecification spec;
+	spec.filterMin = TextureFilter::Linear;
+	spec.filterMag = TextureFilter::Nearest;
+	spec.wrapperS = TextureWrapper::ClampToEdge;
+	spec.wrapperT = TextureWrapper::ClampToEdge;
+	return Texture::Create(color, static_cast<int>(m_TexWidth), static_cast<int>(m_TexHeight));
+}
+
+Ref<Texture> Application::CreateTexture(Vec2 worldPos)
+{
+	return CreateTexture(GetTextureIndex(worldPos));
+}
+
+Ref<Texture> Application::CreateTexture(Vec2Int index)
+{
+	auto tex = CreateTexture();
+	m_Textures[index] = tex;
+	m_TextureObjects.emplace_back(Vec2((index.x * m_TexWidth) + (m_TexWidth/2), (index.y * m_TexHeight) + (m_TexHeight/2)), Vec2(m_TexWidth, m_TexHeight), tex);
+	return tex;
+}
+
+Ref<Texture> Application::GetTexture(Vec2 worldPos)
+{
+	Vec2Int index = GetTextureIndex(worldPos);
+	return GetTexture(index);
+}
+
+Ref<Texture> Application::GetTexture(Vec2Int index)
+{
+	auto it = m_Textures.find(index);
+	if(it == m_Textures.end()) return nullptr;
+	return it->second;
+}
+
+Vec2Int Application::GetTextureIndex(Vec2 worldPos) const
+{
+	Vec2Int index = Vec2Int(Math::Floor(worldPos.x / (float)m_TexWidth),
+							Math::Floor( worldPos.y / (float)m_TexHeight));
+	return index;
+}
+
+PixelData Application::GetTextureInfo(Vec2 worldPos) const
+{
+	auto index = GetTextureIndex(worldPos);
+	auto pixel = Vec2Int(
+			Math::Floor((int)Math::Floor(worldPos.x) % ((int)m_TexWidth)),
+			Math::Floor((int)Math::Floor(worldPos.y) % ((int)m_TexHeight)));
+	if(pixel.x < 0) pixel.x += static_cast<int>(m_TexWidth);
+	if(pixel.y < 0) pixel.y += static_cast<int>(m_TexHeight);
+	return {index, pixel};
+}
+
+bool Application::HasTexture(Vec2 worldPos) const
+{
+	auto index = GetTextureIndex(worldPos);
+	return HasTexture(index);
+}
+
+bool Application::HasTexture(Vec2Int index) const
+{
+	auto it = m_Textures.find(index);
+	return it != m_Textures.end();
 }

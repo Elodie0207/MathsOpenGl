@@ -23,6 +23,7 @@ public:
 
 	inline float GetAspectRatio() const {return m_AspectRatio; }
 	inline float GetSize() const {return m_Size; }
+	void SetSize(float size);
 
 	Vec2 ScreenToGameSpace(Vec2 pos) const;
 	Vec2 GameToScreenSpace(Vec2 pos) const;

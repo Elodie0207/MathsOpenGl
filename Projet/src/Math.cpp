@@ -4,6 +4,16 @@
 
 #include "Math.hpp"
 
+Mat4 Math::TRS(Vec2 position)
+{
+	return TRS(position, Vec2(1.0f, 1.0f));
+}
+
+Mat4 Math::TRS(Vec2 position, Vec2 scale)
+{
+	return TRS(Vec3(position.x, position.y, 0), glm::identity<glm::quat>(), Vec3(scale.x, scale.y, 0));
+}
+
 Mat4 Math::TRS(Vec3 position)
 {
 	return TRS(position, glm::identity<glm::quat>(), Vec3(1.0f, 1.0f, 1.0f));

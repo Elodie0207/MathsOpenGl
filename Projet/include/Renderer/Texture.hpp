@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include <variant>
+#include <limits>
 
 enum TextureFilter
 {
@@ -58,7 +59,7 @@ struct Texture2DSpecification
 	std::string name;
 
 	std::variant<std::filesystem::path, const void*> image;
-	uint32_t width = 0, height = 0, channels = 0;
+	int width = 0, height = 0, channels = 0;
 
 	TextureFilter filterMag = TextureFilter::Linear;
 	TextureFilter filterMin = TextureFilter::Linear;
@@ -73,40 +74,54 @@ struct Texture2DSpecification
 class Texture
 {
 public:
-	static Ref<Texture> Create(const std::filesystem::path& path);
-	static Ref<Texture> Create(Vec3 color, int width, int height);
-	static Ref<Texture> Create(Vec4 color, int width, int height);
-	static Ref<Texture> Create(const uint8_t* data, int width, int height, int channels);
-	static Ref<Texture> Create(const uint16_t* data, int width, int height, int channels);
+	static Ref<Texture> Create(const std::filesystem::path& path, Texture2DSpecification textureSpecs = Texture2DSpecification());
+	static Ref<Texture> Create(Vec3 color, int width, int height, Texture2DSpecification textureSpecs = Texture2DSpecification());
+	static Ref<Texture> Create(Vec4 color, int width, int height, Texture2DSpecification textureSpecs = Texture2DSpecification());
+	static Ref<Texture> Create(const uint8_t* data, int width, int height, int channels, Texture2DSpecification textureSpecs = Texture2DSpecification());
+	static Ref<Texture> Create(const uint16_t* data, int width, int height, int channels, Texture2DSpecification textureSpecs = Texture2DSpecification());
 	static Ref<Texture> Create(Texture2DSpecification textureSpecs);
 public:
-	Texture(const std::filesystem::path& path);
-	Texture(Vec3 color, int width, int height);
-	Texture(Vec4 color, int width, int height);
-	Texture(const uint8_t* data, int width, int height, int channels);
-	Texture(const uint16_t* data, int width, int height, int channels);
+	Texture(const std::filesystem::path& path, Texture2DSpecification textureSpecs);
+	Texture(Vec3 color, int width, int height, Texture2DSpecification textureSpecs);
+	Texture(Vec4 color, int width, int height, Texture2DSpecification textureSpecs);
+	Texture(const uint8_t* data, int width, int height, int channels, Texture2DSpecification textureSpecs);
+	Texture(const uint16_t* data, int width, int height, int channels, Texture2DSpecification textureSpecs);
 	Texture(Texture2DSpecification textureSpecs);
 public:
 	~Texture();
 
-	inline uint32_t GetWidth() const {return m_Width; }
-	inline uint32_t GetHeight() const {return m_Height; }
-	inline uint32_t GetDepth() const { return 0; }
+	inline int GetWidth() const {return m_Width; }
+	inline int GetHeight() const {return m_Height; }
+	inline int GetDepth() const { return 0; }
 	inline uint32_t GetRendererID() const { return m_RendererID; };
-	inline uint32_t GetChannelCount() const {return m_Channels; }
+	inline int GetChannelCount() const {return m_Channels; }
 
 	void Bind() const;
 	static void Unbind();
 
 	std::vector<Vec3> GetPixels3();
 	std::vector<Vec4> GetPixels4();
+
+	Vec3 GetPixel3(Vec2Int pixel);
+	Vec4 GetPixel4(Vec2Int pixel);
+
+	std::vector<uint8_t> GetNativePixels();
+
+	void SetPixel4(Vec2Int pixel, Vec4 color);
+	void SetPixel3(Vec2Int pixel, Vec3 color);
+
+	void SetPixels4(std::vector<Vec4> color);
+	void SetPixels3(std::vector<Vec3> color);
+
+	inline int GetIndex(Vec2Int pixel) {return (pixel.y * m_Width * m_Channels * (m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2)) + (pixel.x * m_Channels * (m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2));}
 private:
 	void Create();
+	void ReCreate(const void* data);
 private:
 	UUID id;
 	Texture2DSpecification m_TextureSpecification;
 	std::filesystem::path m_Path;
-	uint32_t m_Width, m_Height, m_Channels;
+	int m_Width, m_Height, m_Channels;
 	uint32_t m_RendererID;
 	std::vector<Vec3UB> pixels3;
 	std::vector<Vec4UB> pixels4;
