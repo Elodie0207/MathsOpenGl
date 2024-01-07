@@ -112,7 +112,14 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			break;
 		case Tools::FILLING:
 		{
-			if(mouse == MouseButton::Left && state.pressed) {
+			if(mouse == MouseButton::Left) {
+				REI_INFO("============== Mouse Click And Draw ==============");
+				REI_INFO("Mouse Screen Pos : {0}", Math::ToString(state.positionPressed));
+				REI_INFO("Mouse World Pos : {0}", Math::ToString(m_App->ScreenToWorldPos(state.positionPressed)));
+				auto info = m_App->GetTextureInfo(m_App->ScreenToWorldPos(state.positionPressed));
+				REI_INFO("Texture Index : {0}", Math::ToString(info.Index));
+				REI_INFO("Pixel Coords : {0}", Math::ToString(info.Pixel));
+				REI_INFO("==================================================");
 				m_App->WriteScreenPixel(state.positionPressed, Vec4(.8, .1, .2, 1));
 			}
 		}
