@@ -112,6 +112,10 @@ private:
 	Ref<Texture> CreateTexture(Vec2 worldPos);
 	Ref<Texture> CreateTexture(Vec2Int index);
 	Ref<Texture> CreateTexture();
+	Ref<Texture> GetOrCreateTexture(Vec2 worldPos);
+	Ref<Texture> GetOrCreateTexture(Vec2Int index);
+
+	void OverwriteTextures();
 private:
     ApplicationSpecification m_AppSpec;
 	Camera m_Camera;
@@ -130,5 +134,6 @@ private:
 
 	const int m_TexWidth, m_TexHeight;
 	std::unordered_map<Vec2Int, Ref<Texture>> m_Textures;
+	std::unordered_map<Vec2Int, std::unordered_map<Vec2Int, Vec4>> m_PixelCache;
 	std::vector<Quad> m_TextureObjects;
 };

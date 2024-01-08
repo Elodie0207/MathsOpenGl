@@ -56,6 +56,18 @@ public:
 		return glm::distance(l, r);
 	}
 
+	template<typename T>
+	inline static T Min(const T& v1, const T& v2)
+	{
+		return glm::min(v1, v2);
+	}
+
+	template<typename T>
+	inline static T Max(const T& v1, const T& v2)
+	{
+		return glm::max(v1, v2);
+	}
+
 	static Mat4 TRS(Vec3 position);
 	static Mat4 TRS(Vec3 position, Quat rotation);
 	static Mat4 TRS(Vec3 position, Vec3 scale);

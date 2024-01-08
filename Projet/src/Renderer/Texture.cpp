@@ -405,15 +405,15 @@ void Texture::Unbind() {
 std::vector<Vec3> Texture::GetPixels3()
 {
 	std::vector<Vec3> pixels(m_Width * m_Height);
-	uint32_t pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
-	uint32_t pxSize = m_Channels * pxChannelSize;
+	int pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
+	int pxSize = m_Channels * pxChannelSize;
 	auto* data = new uint8_t [m_Width * m_Height * m_Channels * pxChannelSize];
 	auto helper = TexSpecHelper(m_TextureSpecification);
 	glBindTexture(GL_TEXTURE_2D, m_RendererID);
 	glGetTexImage(GL_TEXTURE_2D, 0, helper.GetFormat(), helper.GetType(), data);
-	for (uint32_t i = 0; i < m_Width * m_Height; i+= pxSize)
+	for (int i = 0; i < m_Width * m_Height; i+= pxSize)
 	{
-		uint32_t index = i / pxSize;
+		int index = i / pxSize;
 		for (int j = 0; j < 3; j+= pxChannelSize) {
 			if(m_TextureSpecification.pixelType == PixelType::PX_8) pixels[index][j] = (float)data[i + j] / PX_8_MAX;
 			else pixels[index][j] = (float)*((uint16_t*)(&data[i + j])) / PX_16_MAX;
@@ -427,15 +427,15 @@ std::vector<Vec4> Texture::GetPixels4()
 {
 	std::vector<Vec4> pixels(m_Width * m_Height, Vec4(1.0));
 
-	uint32_t pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
-	uint32_t pxSize = m_Channels * pxChannelSize;
+	int pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
+	int pxSize = m_Channels * pxChannelSize;
 	auto* data = new uint8_t [m_Width * m_Height * m_Channels * pxChannelSize];
 	auto helper = TexSpecHelper(m_TextureSpecification);
 	glBindTexture(GL_TEXTURE_2D, m_RendererID);
 	glGetTexImage(GL_TEXTURE_2D, 0, helper.GetFormat(), helper.GetType(), data);
-	for (uint32_t i = 0; i < m_Width * m_Height; i+= pxSize)
+	for (int i = 0; i < m_Width * m_Height; i+= pxSize)
 	{
-		uint32_t index = i / pxSize;
+		int index = i / pxSize;
 		for (int j = 0; j < std::min(4, (int)m_Channels); j += pxChannelSize) {
 			if(m_TextureSpecification.pixelType == PixelType::PX_8) pixels[index][j] = (float)data[i + j] / PX_8_MAX;
 			else pixels[index][j] = (float)*((uint16_t*)(&data[i + j])) / PX_16_MAX;
@@ -456,8 +456,8 @@ Vec4 Texture::GetPixel4(Vec2Int pixel)
 }
 std::vector<uint8_t> Texture::GetNativePixels()
 {
-	uint32_t pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
-	uint32_t pxSize = m_Channels * pxChannelSize;
+	int pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
+	int pxSize = m_Channels * pxChannelSize;
 	std::vector<uint8_t> result(m_Width * m_Height * pxSize);
 	auto helper = TexSpecHelper(m_TextureSpecification);
 	glBindTexture(GL_TEXTURE_2D, m_RendererID);
@@ -470,15 +470,15 @@ void Texture::SetPixel4(Vec2Int pixel, Vec4 color)
 	if(m_TextureSpecification.pixelFormat == PixelFormat::RGB) return SetPixel3(pixel, {color.x, color.y, color.z});
 
 	// Get the all images
-	uint32_t pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
-	uint32_t pxSize = m_Channels * pxChannelSize;
+	int pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
+	int pxSize = m_Channels * pxChannelSize;
 	auto* data = new uint8_t [m_Width * m_Height * m_Channels * pxChannelSize];
 	auto helper = TexSpecHelper(m_TextureSpecification);
 	glBindTexture(GL_TEXTURE_2D, m_RendererID);
 	glGetTexImage(GL_TEXTURE_2D, 0, helper.GetFormat(), helper.GetType(), data);
 
 	//Edit only one px.
-	uint32_t px = (pixel.y * m_Width * pxSize) + (pixel.x * pxSize);
+	int px = (pixel.y * m_Width * pxSize) + (pixel.x * pxSize);
 	REI_ASSERT(px < m_Width * m_Height * m_Channels * pxChannelSize, "The position cannot be right...");
 	if(pxChannelSize == 1)
 	{
@@ -504,15 +504,15 @@ void Texture::SetPixel3(Vec2Int pixel, Vec3 color)
 	if(m_TextureSpecification.pixelFormat == PixelFormat::RGBA) return SetPixel4(pixel, {color.x, color.y, color.z, 1.0});
 
 	// Get the all images
-	uint32_t pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
-	uint32_t pxSize = m_Channels * pxChannelSize;
+	int pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
+	int pxSize = m_Channels * pxChannelSize;
 	auto* data = new uint8_t [m_Width * m_Height * m_Channels * pxChannelSize];
 	auto helper = TexSpecHelper(m_TextureSpecification);
 	glBindTexture(GL_TEXTURE_2D, m_RendererID);
 	glGetTexImage(GL_TEXTURE_2D, 0, helper.GetFormat(), helper.GetType(), data);
 
 	//Edit only one px.
-	uint32_t px = (pixel.y * m_Width * pxSize) + (pixel.x * pxSize);
+	int px = (pixel.y * m_Width * pxSize) + (pixel.x * pxSize);
 	REI_ASSERT(px < m_Width * m_Height * m_Channels * pxChannelSize, "The position cannot be right...");
 	if(pxChannelSize == 1)
 	{
@@ -529,23 +529,23 @@ void Texture::SetPixel3(Vec2Int pixel, Vec3 color)
 		}
 	}
 
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, helper.GetFormat(), helper.GetType(), data);
+	ReCreate(data);
 	delete[] data;
 }
 
 
-void Texture::SetPixels4(std::vector<Vec4> color)
+void Texture::SetPixels4(const std::vector<Vec4>& color)
 {
 	REI_ASSERT(color.size() == (m_Width * m_Height), "There should be {0} pixels in the array and there is {1}.", m_Width * m_Height, color.size());
-	uint32_t pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
-	uint32_t pxSize = m_Channels * pxChannelSize;
+	int pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
+	int pxSize = m_Channels * pxChannelSize;
 	uint8_t* data = new uint8_t [m_Width * m_Height * pxSize];
 	auto helper = TexSpecHelper(m_TextureSpecification);
 
-	for (uint32_t i = 0; i < m_Width * m_Height; i+= pxSize)
+	for (int i = 0; i < m_Width * m_Height; i+= pxSize)
 	{
-		uint32_t index = i / pxSize;
-		for (uint32_t j = 0; j < std::min(4, (int)m_Channels); j += pxChannelSize) {
+		int index = i / pxSize;
+		for (int j = 0; j < std::min(4, (int)m_Channels); j += pxChannelSize) {
 			if(m_TextureSpecification.pixelType == PixelType::PX_8) {
 				data[i + j] = static_cast<uint8_t>(color[index][j] * PX_8_MAX);
 			}
@@ -555,21 +555,21 @@ void Texture::SetPixels4(std::vector<Vec4> color)
 		}
 	}
 
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, helper.GetFormat(), helper.GetType(), data);
+	ReCreate(data);
 	delete[] data;
 }
-void Texture::SetPixels3(std::vector<Vec3> color)
+void Texture::SetPixels3(const std::vector<Vec3>& color)
 {
 	REI_ASSERT(color.size() == (m_Width * m_Height), "There should be {0} pixels in the array and there is {1}.", m_Width * m_Height, color.size());
-	uint32_t pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
-	uint32_t pxSize = m_Channels * pxChannelSize;
+	int pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
+	int pxSize = m_Channels * pxChannelSize;
 	uint8_t* data = new uint8_t [m_Width * m_Height * pxSize];
 	auto helper = TexSpecHelper(m_TextureSpecification);
 
-	for (uint32_t i = 0; i < m_Width * m_Height; i+= pxSize)
+	for (int i = 0; i < m_Width * m_Height; i+= pxSize)
 	{
-		uint32_t index = i / pxSize;
-		for (uint32_t j = 0; j < 3; j += pxChannelSize) {
+		int index = i / pxSize;
+		for (int j = 0; j < 3; j += pxChannelSize) {
 			if(m_TextureSpecification.pixelType == PixelType::PX_8) {
 				data[i + j] = static_cast<uint8_t>(color[index][j] * PX_8_MAX);
 			}
@@ -579,7 +579,96 @@ void Texture::SetPixels3(std::vector<Vec3> color)
 		}
 	}
 
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, m_Width, m_Height, helper.GetFormat(), helper.GetType(), data);
+	ReCreate(data);
+	delete[] data;
+}
+
+void Texture::SetPixels(const std::vector<PixelColor>& pixels)
+{
+	int pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
+	int pxSize = m_Channels * pxChannelSize;
+	uint8_t* data = new uint8_t[m_Width * m_Height * pxSize];
+	auto helper = TexSpecHelper(m_TextureSpecification);
+	glBindTexture(GL_TEXTURE_2D, m_RendererID);
+	glGetTexImage(GL_TEXTURE_2D, 0, helper.GetFormat(), helper.GetType(), data);
+
+	for (auto& px : pixels)
+	{
+		auto index = GetIndex(px.Position);
+		if (m_Channels == 3)
+		{
+			if (m_TextureSpecification.pixelType == PixelType::PX_8)
+			{
+				Vec3UB color = Vec3UB(px.Color.x * PX_8_MAX, px.Color.y * PX_8_MAX, px.Color.z * PX_8_MAX);
+				(*((Vec3UB*)&data[index])) = color;
+			}
+			else
+			{
+				Vec3US color = Vec3US(px.Color.x * PX_16_MAX, px.Color.y * PX_16_MAX, px.Color.z * PX_16_MAX);
+				(*((Vec3US*)&data[index])) = color;
+			}
+		}
+		else // if (m_Channels == 4)
+		{
+			if (m_TextureSpecification.pixelType == PixelType::PX_8)
+			{
+				Vec4UB color = Vec4UB(px.Color.x * PX_8_MAX, px.Color.y * PX_8_MAX, px.Color.z * PX_8_MAX, px.Color.w * PX_8_MAX);
+				(*((Vec4UB*)&data[index])) = color;
+			}
+			else
+			{
+				Vec4US color = Vec4US(px.Color.x * PX_16_MAX, px.Color.y * PX_16_MAX, px.Color.z * PX_16_MAX, px.Color.w * PX_16_MAX);
+				(*((Vec4US*)&data[index])) = color;
+			}
+		}
+	}
+
+	ReCreate(data);
+	delete[] data;
+}
+
+
+void Texture::SetPixels(const std::unordered_map<Vec2Int, Vec4>& pixels)
+{
+	int pxChannelSize = m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2;
+	int pxSize = m_Channels * pxChannelSize;
+	uint8_t* data = new uint8_t[m_Width * m_Height * pxSize];
+	auto helper = TexSpecHelper(m_TextureSpecification);
+	glBindTexture(GL_TEXTURE_2D, m_RendererID);
+	glGetTexImage(GL_TEXTURE_2D, 0, helper.GetFormat(), helper.GetType(), data);
+
+	for (auto&& [position, color] : pixels)
+	{
+		auto index = GetIndex(position);
+		if (m_Channels == 3)
+		{
+			if (m_TextureSpecification.pixelType == PixelType::PX_8)
+			{
+				Vec3UB c= Vec3UB(color.x * PX_8_MAX, color.y * PX_8_MAX, color.z * PX_8_MAX);
+				(*((Vec3UB*)&data[index])) = c;
+			}
+			else
+			{
+				Vec3US c= Vec3US(color.x * PX_16_MAX, color.y * PX_16_MAX, color.z * PX_16_MAX);
+				(*((Vec3US*)&data[index])) = c;
+			}
+		}
+		else // if (m_Channels == 4)
+		{
+			if (m_TextureSpecification.pixelType == PixelType::PX_8)
+			{
+				Vec4UB c= Vec4UB(color.x * PX_8_MAX, color.y * PX_8_MAX, color.z * PX_8_MAX, color.w * PX_8_MAX);
+				(*((Vec4UB*)&data[index])) = c;
+			}
+			else
+			{
+				Vec4US c= Vec4US(color.x * PX_16_MAX, color.y * PX_16_MAX, color.z * PX_16_MAX, color.w * PX_16_MAX);
+				(*((Vec4US*)&data[index])) = c;
+			}
+		}
+	}
+
+	ReCreate(data);
 	delete[] data;
 }
 

@@ -109,5 +109,5 @@ private:
 
 	DrawObject drawObj;
 	Quad quad;
-	float m_CameraSpeed = 50.0f;
+	float m_CameraSpeed = 0.6f;
 };

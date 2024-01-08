@@ -323,6 +323,8 @@ void Application::Render() {
 	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	OverwriteTextures();
+
 	const Mat4& viewProj = m_Camera.GetViewProjMatrix();
 
 	for(auto& quad : m_TextureObjects)
@@ -330,7 +332,7 @@ void Application::Render() {
 		quad.Draw(viewProj);
 	}
 
-//	m_Tools.Draw(viewProj);
+	m_Tools.Draw(viewProj);
 
 	glFlush();
 }
@@ -378,18 +380,8 @@ void Application::WriteWorldPixel(Vec2 worldPos, Vec4 color01)
 	auto info = GetTextureInfo(worldPos);
 	auto& index = info.Index;
 	auto& pixel = info.Pixel;
-	Ref<Texture> texture;
 
-	if(!HasTexture(index))
-	{
-		texture = CreateTexture(index);
-	}
-	else
-	{
-		texture = GetTexture(index);
-	}
-
-	texture->SetPixel4(pixel, color01);
+	m_PixelCache[index][pixel] = color01;
 }
 
 Vec4 Application::ReadScreenPixel(Vec2Int screenPos)
@@ -403,17 +395,18 @@ Vec4 Application::ReadWorldPixel(Vec2 worldPos)
 	auto info = GetTextureInfo(worldPos);
 	auto& index = info.Index;
 	auto& pixel = info.Pixel;
-	Ref<Texture> texture;
 
-	if(!HasTexture(index))
+	auto it = m_PixelCache.find(index);
+	if (it != m_PixelCache.end())
 	{
-		texture = CreateTexture(index);
-	}
-	else
-	{
-		texture = GetTexture(index);
+		auto pxIt = it->second.find(pixel);
+		if (pxIt != it->second.end())
+		{
+			return pxIt->second;
+		}
 	}
 
+	Ref<Texture> texture = GetOrCreateTexture(index);
 	return texture->GetPixel4(pixel);
 }
 
@@ -434,10 +427,21 @@ Ref<Texture> Application::CreateTexture() {
 	Vec4 color = {1,1,1,1};
 	Texture2DSpecification spec;
 	spec.filterMin = TextureFilter::Linear;
-	spec.filterMag = TextureFilter::Nearest;
+	spec.filterMag = TextureFilter::Linear;
 	spec.wrapperS = TextureWrapper::ClampToEdge;
 	spec.wrapperT = TextureWrapper::ClampToEdge;
 	return Texture::Create(color, static_cast<int>(m_TexWidth), static_cast<int>(m_TexHeight));
+}
+
+void Application::OverwriteTextures()
+{
+	for (auto&& [textureId, pixels] : m_PixelCache)
+	{
+		if (pixels.size() == 0) continue;
+		auto texture = GetOrCreateTexture(textureId);
+		texture->SetPixels(pixels);
+		pixels.clear();
+	}
 }
 
 Ref<Texture> Application::CreateTexture(Vec2 worldPos)
@@ -494,4 +498,25 @@ bool Application::HasTexture(Vec2Int index) const
 {
 	auto it = m_Textures.find(index);
 	return it != m_Textures.end();
+}
+
+Ref<Texture> Application::GetOrCreateTexture(Vec2 worldPos)
+{
+	return GetOrCreateTexture(GetTextureIndex(worldPos));
+}
+
+Ref<Texture> Application::GetOrCreateTexture(Vec2Int index)
+{
+	Ref<Texture> texture;
+	auto it = m_Textures.find(index);
+	if (it == m_Textures.end())
+	{
+		texture = CreateTexture(index);
+	}
+	else
+	{
+		texture = it->second;
+	}
+
+	return texture;
 }

@@ -12,6 +12,15 @@
 #include <variant>
 #include <limits>
 
+struct PixelColor
+{
+	inline PixelColor(Vec2Int position, Vec4 color) : Position(position), Color(color) {}
+	inline PixelColor() = default;
+	inline ~PixelColor() = default;
+	Vec2Int Position;
+	Vec4 Color;
+};
+
 enum TextureFilter
 {
 	Nearest,
@@ -110,8 +119,11 @@ public:
 	void SetPixel4(Vec2Int pixel, Vec4 color);
 	void SetPixel3(Vec2Int pixel, Vec3 color);
 
-	void SetPixels4(std::vector<Vec4> color);
-	void SetPixels3(std::vector<Vec3> color);
+	void SetPixels4(const std::vector<Vec4>& color);
+	void SetPixels3(const std::vector<Vec3>& color);
+
+	void SetPixels(const std::vector<PixelColor>& pixels);
+	void Texture::SetPixels(const std::unordered_map<Vec2Int, Vec4>& pixels);
 
 	inline int GetIndex(Vec2Int pixel) {return (pixel.y * m_Width * m_Channels * (m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2)) + (pixel.x * m_Channels * (m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2));}
 private:

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.26)
+cmake_minimum_required(VERSION 3.14)
 project(MathsOpenGl)
 
 # set enable the debugger (when the debug mode is enable?)
