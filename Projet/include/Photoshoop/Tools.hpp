@@ -91,6 +91,12 @@ public:
 	 */
     void CHANGE_COLOR();
 private:
+	/// === MOVEMENT ===
+
+	bool mouseMoving = false;
+	Vec2Int mousePosPressed;
+	Vec2 camPosePressed;
+
 	/// === DRAW POLY ===
 	void ClearDrawnPoly();
 	void AddPointToPoly(Vec2Int screenPos);

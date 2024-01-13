@@ -52,7 +52,7 @@ void ToolsHandler::Destroy()
 
 bool ToolsHandler::OnUpdate(float deltaTime)
 {
-	if(m_Tool == Tools::MOVE && !m_App->GetMouseDown(MouseButton::Left))
+	if(!mouseMoving && m_Tool == Tools::MOVE && !m_App->GetMouseDown(MouseButton::Left))
 	{    // Camera Movement
 		Vec2 movement(0.0f);
 		float frameMovement = m_CameraSpeed * deltaTime * m_App->GetCamera().GetSize();
@@ -119,13 +119,27 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 {
 	switch (m_Tool)
 	{
+		case Tools::MOVE:
+		{
+			if(mouse== MouseButton::Left)
+			{
+				mouseMoving = true;
+				mousePosPressed = state.positionPressed;
+				camPosePressed = m_App->GetCamera().GetPosition();
+			}
+			else if(mouse == MouseButton::Right)
+			{
+				mouseMoving = false;
+			}
+		}
+		break;
 		case Tools::DRAW_POLYGONE:
 			if(mouse == MouseButton::Left) {
 
 
                 AddPointToPoly(state.positionPressed);
 				return true;
-			} else if (mouse == MouseButton::Middle) {
+			} else {
 				StopDrawingPoly();
 				return true;
 			}
@@ -134,7 +148,7 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			if(mouse == MouseButton::Left) {
 				AddPointToWindow(state.positionPressed);
 				return true;
-			} else if (mouse == MouseButton::Middle) {
+			} else {
 				StopDrawingWindow();
 				return true;
 			}
@@ -163,6 +177,22 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 {
 	switch (m_Tool)
 	{
+		case Tools::MOVE:
+		{
+			if(mouse== MouseButton::Left)
+			{
+				mouseMoving = false;
+				auto mousePosReleased = state.positionReleased;
+
+				auto gamePosPressed = m_App->ScreenToWorldPos(mousePosPressed);
+				auto gamePosReleased = m_App->ScreenToWorldPos(mousePosReleased);
+				auto movement = gamePosPressed - gamePosReleased;
+				if(movement != Vec2(0,0)) {
+					m_App->GetCamera().SetPosition(camPosePressed + movement);
+					return true;
+				}
+			}
+		}
 		case Tools::FILLING:
 		{
 			if (mouse == MouseButton::Left) {
@@ -189,6 +219,20 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 
 bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 	switch (m_Tool) {
+		case Tools::MOVE:
+		{
+			if(mouseMoving)
+			{
+				auto gamePosPressed = m_App->ScreenToWorldPos(mousePosPressed);
+				auto gamePos = m_App->ScreenToWorldPos(mousePos);
+
+				auto movement = gamePosPressed - gamePos;
+				if(movement != Vec2(0,0)) {
+					m_App->GetCamera().SetPosition(camPosePressed + movement);
+					return true;
+				}
+			}
+		}
 		case Tools::DRAW_POLYGONE:
 		{
 			if(!drawingPoly) break;
