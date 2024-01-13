@@ -35,17 +35,11 @@ ToolsHandler::~ToolsHandler()
 }
 
 void ToolsHandler::Initialize() {
-	drawObj.m_Color = Vec4(0.8,0.2,0.3,1);
-
-
-
-	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
 //	drawObj.m_Color = Vec4(0.8,0.2,0.3,1);
+//	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
 	polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
 	windowDrawn.m_Color = Vec4(0.8, 0.3, 0.2, 1);
 	windowedPoly.m_Color = Vec4(0.2, 0.8, 0.3, 1);
-
-//	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
 }
 
 void ToolsHandler::Destroy()
@@ -97,22 +91,19 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 	return false;
 }
 
-void ToolsHandler::Draw(const Mat4 &ViewProjMatrix) {
-	drawObj.Draw(ViewProjMatrix);
-	quad.Draw(ViewProjMatrix);
+void ToolsHandler::Draw(const Mat4 &viewProjMatrix) {
+//	drawObj.Draw(viewProjMatrix);
+//	quad.Draw(viewProjMatrix);
     if(color==0) {
-
         polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
     }
     else if(color==1) {
-        polyDrawn.m_Color = Vec4(0.0f, 1.0f, 0.0f, 1.0f);
+        polyDrawn.m_Color = Vec4(0.2f, 0.8f, 0.3f, 1.0f);
     }
     else if(color==2){
-
-        polyDrawn.m_Color= Vec4(1.0f, 0.0f, 0.0f, 1.0f);
-
+        polyDrawn.m_Color= Vec4(0.8f, 0.3f, 0.2f, 1.0f);
     }
-	polyDrawn.Draw(ViewProjMatrix);
+	polyDrawn.Draw(viewProjMatrix);
 	windowDrawn.Draw(viewProjMatrix);
 	windowedPoly.Draw(viewProjMatrix);
 }
