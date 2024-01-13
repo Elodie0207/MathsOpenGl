@@ -211,7 +211,7 @@ void fill_between_edges(const Edge& edge1, const Edge& edge2, int y, std::vector
 }
 
 // Effectue le remplissage de polygone en utilisant l'algorithme de balayage
-void polygon_fill(const std::vector<Point>& poly, std::vector<std::vector<Color>>& image, const Color& color_fill) {
+void Math::polygon_fill(const std::vector<Point>& poly, std::vector<std::vector<Color>>& image, const Color& color_fill) {
     std::vector<Edge> edges = create_edges(poly);
     int min_y = std::min_element(poly.begin(), poly.end(), [](const Point& a, const Point& b) { return a.y < b.y; })->y;
     int max_y = std::max_element(poly.begin(), poly.end(), [](const Point& a, const Point& b) { return a.y < b.y; })->y;
@@ -237,7 +237,7 @@ bool operator!=(const Color& c1, const Color& c2) {
     return c1.r != c2.r || c1.g != c2.g || c1.b != c2.b;
 }
 // Effectue le remplissage par region
-void fillRegionConnexity4(int x, int y, std::vector<std::vector<Color>>& image, const Color& colorContour, const Color& colorFill) {
+void Math::fillRegionConnexity4(int x, int y, std::vector<std::vector<Color>>& image, const Color& colorContour, const Color& colorFill) {
     // Vérifier si les coordonnées sont dans les limites de l'image
     if (x < 0 || x >= image.size() || y < 0 || y >= image[0].size()) return;
 
