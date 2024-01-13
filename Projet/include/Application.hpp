@@ -134,6 +134,6 @@ private:
 
 	const int m_TexWidth, m_TexHeight;
 	std::unordered_map<Vec2Int, Ref<Texture>> m_Textures;
-	std::unordered_map<Vec2Int, std::unordered_map<Vec2Int, Vec4>> m_PixelCache;
+//	std::unordered_map<Vec2Int, std::unordered_map<Vec2Int, Vec4>> m_PixelCache;
 	std::vector<Quad> m_TextureObjects;
 };

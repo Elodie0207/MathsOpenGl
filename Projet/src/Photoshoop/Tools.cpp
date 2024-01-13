@@ -4,6 +4,7 @@
 
 #include "Photoshoop/Tools.hpp"
 #include "Application.hpp"
+#include "Parameters.hpp"
 
 // ===================== COMMON =====================
 void ToolsHandler::SetTool(Tools tool)
@@ -153,14 +154,7 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 		{
 			if(mouse == MouseButton::Left) {
 				MousePosePressDraw = state.positionPressed;
-				REI_INFO("============== Mouse Click And Draw ==============");
-				REI_INFO("Mouse Screen Pos : {0}", Math::ToString(state.positionPressed));
-				REI_INFO("Mouse World Pos : {0}", Math::ToString(m_App->ScreenToWorldPos(state.positionPressed)));
-				auto info = m_App->GetTextureInfo(m_App->ScreenToWorldPos(state.positionPressed));
-				REI_INFO("Texture Index : {0}", Math::ToString(info.Index));
-				REI_INFO("Pixel Coords : {0}", Math::ToString(info.Pixel));
-				REI_INFO("==================================================");
-				//m_App->WriteScreenPixel(state.positionPressed, Vec4(.8, .1, .2, 1));
+				Math::polygon_fill(polyDrawn.GetPoints(), *m_App, Parameters::GetColor());
 			}
 		}
 		break;
@@ -201,26 +195,26 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 				}
 			}
 		}
-		case Tools::FILLING:
-		{
-			if (mouse == MouseButton::Left) {
-				Vec2Int pressed = m_App->ScreenToWorldPos(state.positionPressed);
-				Vec2Int released = m_App->ScreenToWorldPos(state.positionReleased);
-				auto begin = Math::Min(pressed, released);
-				auto end = Math::Max(pressed, released);
-				auto color = Vec4(.8, .1, .2, 1);
-
-				for (int x = begin.x; x <= end.x; x++)
-				{
-					for (int y = begin.y; y <= end.y; y++)
-					{
-						m_App->WriteWorldPixel({ x,y }, color);
-					}
-				}
-				return true;
-
-			}
-		}
+//		case Tools::FILLING:
+//		{
+//			if (mouse == MouseButton::Left) {
+//				Vec2Int pressed = m_App->ScreenToWorldPos(state.positionPressed);
+//				Vec2Int released = m_App->ScreenToWorldPos(state.positionReleased);
+//				auto begin = Math::Min(pressed, released);
+//				auto end = Math::Max(pressed, released);
+//				auto color = Vec4(.8, .1, .2, 1);
+//
+//				for (int x = begin.x; x <= end.x; x++)
+//				{
+//					for (int y = begin.y; y <= end.y; y++)
+//					{
+//						m_App->WriteWorldPixel({ x,y }, color);
+//					}
+//				}
+//				return true;
+//
+//			}
+//		}
 	}
 	return false;
 }

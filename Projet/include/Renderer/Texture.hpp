@@ -114,7 +114,7 @@ public:
 	Vec3 GetPixel3(Vec2Int pixel);
 	Vec4 GetPixel4(Vec2Int pixel);
 
-	std::vector<uint8_t> GetNativePixels();
+	const std::vector<uint8_t>& GetNativePixels();
 
 	void SetPixel4(Vec2Int pixel, Vec4 color);
 	void SetPixel3(Vec2Int pixel, Vec3 color);
@@ -125,7 +125,11 @@ public:
 	void SetPixels(const std::vector<PixelColor>& pixels);
 	void SetPixels(const std::unordered_map<Vec2Int, Vec4>& pixels);
 
-	inline int GetIndex(Vec2Int pixel) {return (pixel.y * m_Width * m_Channels * (m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2)) + (pixel.x * m_Channels * (m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2));}
+	inline int GetIndex(Vec2Int pixel);
+
+	void UpdateTexture();
+
+	inline bool IsDirty() const {return dirty;}
 private:
 	void Create();
 	void ReCreate(const void* data);
@@ -135,6 +139,6 @@ private:
 	std::filesystem::path m_Path;
 	int m_Width, m_Height, m_Channels;
 	uint32_t m_RendererID;
-	std::vector<Vec3UB> pixels3;
-	std::vector<Vec4UB> pixels4;
+	std::vector<uint8_t> pixels;
+	bool dirty = false;
 };

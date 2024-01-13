@@ -3,6 +3,7 @@
 //
 
 #include "Math.hpp"
+#include "Application.hpp"
 
 Mat4 Math::TRS(Vec2 position)
 {
@@ -169,10 +170,6 @@ struct Edge {
     Edge(int ymn, int ymx, float xPos, float slope) : ymin(ymn), ymax(ymx), x(xPos), dx(slope) {}
 };
 
-struct Color {
-    int r, g, b;
-};
-
 // Crée une liste d'arêtes à partir des points du polygone
 std::vector<Edge> create_edges(const std::vector<Point>& poly) {
     std::vector<Edge> edges;
@@ -202,16 +199,16 @@ void update_active_edge_table(std::vector<Edge>& aet, const std::vector<Edge>& e
 }
 
 // Remplit l'espace entre deux arêtes actives dans l'image
-void fill_between_edges(const Edge& edge1, const Edge& edge2, int y, std::vector<std::vector<Color>>& image, const Color& color_fill) {
+void fill_between_edges(const Edge& edge1, const Edge& edge2, int y, Application& app, const Color& color_fill) {
     int x_start = static_cast<int>(edge1.x);
     int x_end = static_cast<int>(edge2.x);
     for (int x = x_start; x < x_end; ++x) {
-        image[y][x] = color_fill;
+		app.WriteWorldPixel({x,y}, color_fill);
     }
 }
 
 // Effectue le remplissage de polygone en utilisant l'algorithme de balayage
-void Math::polygon_fill(const std::vector<Point>& poly, std::vector<std::vector<Color>>& image, const Color& color_fill) {
+void Math::polygon_fill(const std::vector<Point>& poly, Application& app, const Color& color_fill) {
     std::vector<Edge> edges = create_edges(poly);
     int min_y = std::min_element(poly.begin(), poly.end(), [](const Point& a, const Point& b) { return a.y < b.y; })->y;
     int max_y = std::max_element(poly.begin(), poly.end(), [](const Point& a, const Point& b) { return a.y < b.y; })->y;
@@ -223,7 +220,7 @@ void Math::polygon_fill(const std::vector<Point>& poly, std::vector<std::vector<
 
         for (size_t i = 0; i < active_edge_table.size(); i += 2) {
             if (i + 1 < active_edge_table.size()) {
-                fill_between_edges(active_edge_table[i], active_edge_table[i + 1], y, image, color_fill);
+                fill_between_edges(active_edge_table[i], active_edge_table[i + 1], y, app, color_fill);
             }
         }
 
@@ -233,22 +230,20 @@ void Math::polygon_fill(const std::vector<Point>& poly, std::vector<std::vector<
     }
 }
 
-bool operator!=(const Color& c1, const Color& c2) {
-    return c1.r != c2.r || c1.g != c2.g || c1.b != c2.b;
-}
 // Effectue le remplissage par region
-void Math::fillRegionConnexity4(int x, int y, std::vector<std::vector<Color>>& image, const Color& colorContour, const Color& colorFill) {
+void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill) {
     // Vérifier si les coordonnées sont dans les limites de l'image
-    if (x < 0 || x >= image.size() || y < 0 || y >= image[0].size()) return;
+    if (x < min.x || x >= max.x || y < min.y || y >= max.y) return;
 
     // Vérifier si la couleur actuelle n'est ni la couleur de contour ni celle de remplissage
-    if (image[x][y] != colorContour && image[x][y] != colorFill) {
-        image[x][y] = colorFill;
+	auto color = app.ReadWorldPixel({x,y});
+    if (color != colorContour && color != colorFill) {
+		app.WriteWorldPixel({x,y}, colorFill);
 
         // Appels récursifs pour remplir les régions adjacentes
-        fillRegionConnexity4(x, y - 1, image, colorContour, colorFill); // Bas
-        fillRegionConnexity4(x - 1, y, image, colorContour, colorFill); // Gauche
-        fillRegionConnexity4(x, y + 1, image, colorContour, colorFill); // Haut
-        fillRegionConnexity4(x + 1, y, image, colorContour, colorFill); // Droite
+        fillRegionConnexity4(x + 0, y - 1, min, max, app, colorContour, colorFill); // Bas
+        fillRegionConnexity4(x - 1, y + 0, min, max, app, colorContour, colorFill); // Gauche
+        fillRegionConnexity4(x + 0, y + 1, min, max, app, colorContour, colorFill); // Haut
+        fillRegionConnexity4(x + 1, y + 0, min, max, app, colorContour, colorFill); // Droite
     }
 }

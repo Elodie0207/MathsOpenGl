@@ -33,7 +33,11 @@ typedef glm::quat Quat;
 
 typedef glm::mat4 Mat4;
 
-typedef glm::dvec2 Point;
+typedef glm::vec2 Point;
+
+typedef Vec4 Color;
+
+class Application;
 
 class Math
 {
@@ -81,14 +85,9 @@ public:
 	static Point intersection(const Point& a, const Point& b, const Point& c, const Point& d);
 	static std::vector<Point> sutherlandHodgman(std::vector<Point> PL, const std::vector<Point>& PW);
 
-	struct Color {
-		int r, g, b;
-	};
 
-	static void polygon_fill(const std::vector<Point>& poly, std::vector<std::vector<Color>>& image, const Color& color_fill);
-	static void fillRegionConnexity4(int x, int y, std::vector<std::vector<Color>>& image, const Color& colorContour, const Color& colorFill);
-
-
+	static void polygon_fill(const std::vector<Point>& poly, Application& app, const Color& color_fill);
+	static void fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill);
 
 
 	/**

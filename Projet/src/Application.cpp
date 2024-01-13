@@ -380,7 +380,9 @@ void Application::WriteWorldPixel(Vec2 worldPos, Vec4 color01)
 	auto& index = info.Index;
 	auto& pixel = info.Pixel;
 
-	m_PixelCache[index][pixel] = color01;
+	GetOrCreateTexture(index)->SetPixel4(pixel, color01);
+
+//	m_PixelCache[index][pixel] = color01;
 }
 
 Vec4 Application::ReadScreenPixel(Vec2Int screenPos)
@@ -394,16 +396,6 @@ Vec4 Application::ReadWorldPixel(Vec2 worldPos)
 	auto info = GetTextureInfo(worldPos);
 	auto& index = info.Index;
 	auto& pixel = info.Pixel;
-
-	auto it = m_PixelCache.find(index);
-	if (it != m_PixelCache.end())
-	{
-		auto pxIt = it->second.find(pixel);
-		if (pxIt != it->second.end())
-		{
-			return pxIt->second;
-		}
-	}
 
 	Ref<Texture> texture = GetOrCreateTexture(index);
 	return texture->GetPixel4(pixel);
@@ -434,12 +426,12 @@ Ref<Texture> Application::CreateTexture() {
 
 void Application::OverwriteTextures()
 {
-	for (auto&& [textureId, pixels] : m_PixelCache)
+	for (auto& texObj : m_TextureObjects)
 	{
-		if (pixels.size() == 0) continue;
-		auto texture = GetOrCreateTexture(textureId);
-		texture->SetPixels(pixels);
-		pixels.clear();
+		if(texObj.m_Texture->IsDirty())
+		{
+			texObj.m_Texture->UpdateTexture();
+		}
 	}
 }
 
