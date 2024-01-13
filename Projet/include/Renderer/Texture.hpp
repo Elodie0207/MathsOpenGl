@@ -123,7 +123,7 @@ public:
 	void SetPixels3(const std::vector<Vec3>& color);
 
 	void SetPixels(const std::vector<PixelColor>& pixels);
-	void Texture::SetPixels(const std::unordered_map<Vec2Int, Vec4>& pixels);
+	void SetPixels(const std::unordered_map<Vec2Int, Vec4>& pixels);
 
 	inline int GetIndex(Vec2Int pixel) {return (pixel.y * m_Width * m_Channels * (m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2)) + (pixel.x * m_Channels * (m_TextureSpecification.pixelType == PixelType::PX_8 ? 1 : 2));}
 private:

@@ -21,6 +21,9 @@ enum class Tools
 	DRAW_WINDOW,
 	WINDOWING,
 	FILLING,
+    RED,
+    BLUE,
+    GREEN
 };
 
 class ToolsHandler {
@@ -83,6 +86,10 @@ public:
 	 * @return Whether we should rerender.
 	 */
 	bool OnMouseMove(Vec2Int mousePos);
+    /**
+	 * Function called each time the user wants to change the color.
+	 */
+    void CHANGE_COLOR();
 private:
 	/// === DRAW POLY ===
 	void ClearDrawnPoly();
@@ -110,4 +117,7 @@ private:
 	DrawObject drawObj;
 	Quad quad;
 	float m_CameraSpeed = 0.6f;
+    int color=0;
+
+
 };

@@ -32,7 +32,9 @@ ToolsHandler::~ToolsHandler()
 
 void ToolsHandler::Initialize() {
 	drawObj.m_Color = Vec4(0.8,0.2,0.3,1);
-	polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
+
+
+
 	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
 }
 
@@ -94,6 +96,18 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 void ToolsHandler::Draw(const Mat4 &ViewProjMatrix) {
 	drawObj.Draw(ViewProjMatrix);
 	quad.Draw(ViewProjMatrix);
+    if(color==0) {
+
+        polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
+    }
+    else if(color==1) {
+        polyDrawn.m_Color = Vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    }
+    else if(color==2){
+
+        polyDrawn.m_Color= Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+
+    }
 	polyDrawn.Draw(ViewProjMatrix);
 }
 static Vec2Int MousePosePressDraw;
@@ -103,7 +117,9 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 	{
 		case Tools::DRAW_POLYGONE:
 			if(mouse == MouseButton::Left) {
-				AddPointToPoly(state.positionPressed);
+
+
+                AddPointToPoly(state.positionPressed);
 				return true;
 			} else if (mouse == MouseButton::Middle) {
 				StopDrawingPoly();
@@ -124,6 +140,8 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 				//m_App->WriteScreenPixel(state.positionPressed, Vec4(.8, .1, .2, 1));
 			}
 		}
+
+
 	}
 	return false;
 }
@@ -214,4 +232,14 @@ void ToolsHandler::AddPointToPoly(Vec2Int screenPos)
 		ClearDrawnPoly();
 	}
 }
+
+void ToolsHandler::CHANGE_COLOR() {;
+
+    int userchoice;
+    REI_INFO("0 for blue, 1 for green, 2 for red");
+    std::cin >> userchoice;
+    REI_INFO(userchoice);
+    color=userchoice;
+}
+
 

@@ -123,7 +123,7 @@ void Application::CreateMenu() {
 
 	// Ajout des entrées dans le menu
 	glutAddMenuEntry("move", (int)Tools::MOVE);
-	glutAddMenuEntry("couleurs", (int)Tools::CHANGE_COLOR);
+    glutAddMenuEntry("couleurs", (int)Tools::CHANGE_COLOR);
 	glutAddMenuEntry("trace polygone", (int)Tools::DRAW_POLYGONE);
 	glutAddMenuEntry("trace fenetre", (int)Tools::DRAW_WINDOW);
 	glutAddMenuEntry("fenetrage", (int)Tools::WINDOWING);
@@ -145,9 +145,8 @@ void Application::Menu(int value)
 
 	switch (tool) {
 		case Tools::CHANGE_COLOR:
-			//TODO: Handling the change of color
-			REI_INFO("Should Change Color.");
-//			auto previous = m_Tools.GetSelectedTool();
+
+            m_Tools.CHANGE_COLOR();
 			m_Tools.SetTool(Tools::NONE);
 			//TODO: set back to the previous tools once the color has been selected/changed.
 			break;
