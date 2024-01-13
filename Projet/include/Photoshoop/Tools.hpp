@@ -115,6 +115,8 @@ private:
 
 	/// === WINDOWING ===
 
+	Poly windowedPoly;
+
 	//TODO: Add function & variables to make the windowing here.
 
 	/// === FILLING ===

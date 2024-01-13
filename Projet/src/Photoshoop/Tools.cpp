@@ -43,6 +43,8 @@ void ToolsHandler::Initialize() {
 //	drawObj.m_Color = Vec4(0.8,0.2,0.3,1);
 	polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
 	windowDrawn.m_Color = Vec4(0.8, 0.3, 0.2, 1);
+	windowedPoly.m_Color = Vec4(0.2, 0.8, 0.3, 1);
+
 //	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
 }
 
@@ -112,6 +114,7 @@ void ToolsHandler::Draw(const Mat4 &ViewProjMatrix) {
     }
 	polyDrawn.Draw(ViewProjMatrix);
 	windowDrawn.Draw(viewProjMatrix);
+	windowedPoly.Draw(viewProjMatrix);
 }
 
 static Vec2Int MousePosePressDraw;
@@ -134,25 +137,27 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 		}
 		break;
 		case Tools::DRAW_POLYGONE:
-			if(mouse == MouseButton::Left) {
-
-
-                AddPointToPoly(state.positionPressed);
+		{
+			if (mouse == MouseButton::Left) {
+				AddPointToPoly(state.positionPressed);
 				return true;
 			} else {
 				StopDrawingPoly();
 				return true;
 			}
-			break;
+		}
+		break;
 		case Tools::DRAW_WINDOW:
-			if(mouse == MouseButton::Left) {
+		{
+			if (mouse == MouseButton::Left) {
 				AddPointToWindow(state.positionPressed);
 				return true;
 			} else {
 				StopDrawingWindow();
 				return true;
 			}
-			break;
+		}
+		break;
 		case Tools::FILLING:
 		{
 			if(mouse == MouseButton::Left) {
@@ -167,8 +172,20 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 				//m_App->WriteScreenPixel(state.positionPressed, Vec4(.8, .1, .2, 1));
 			}
 		}
-
-
+		break;
+		case Tools::WINDOWING:
+		{
+			if(polyDrawn.GetPointCount() > 2 && windowDrawn.GetPointCount() > 2)
+			{
+				auto points = Math::sutherlandHodgman(polyDrawn.GetLoopPoints(), windowDrawn.GetLoopPoints());
+				windowedPoly.m_Points.clear();
+				for(const auto& p : points)
+				{
+					windowedPoly.m_Points.emplace_back(p.x, p.y);
+				}
+			}
+		}
+		break;
 	}
 	return false;
 }
