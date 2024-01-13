@@ -20,6 +20,9 @@ public:
 
 	void Draw(const Mat4& viewProjMatrix) const;
 
+	std::vector<Point> GetLoopPoints() const;
+	std::vector<Point> GetPoints() const;
+
 	std::vector<Vec2Int>::iterator begin();
 	std::vector<Vec2Int>::iterator end();
 

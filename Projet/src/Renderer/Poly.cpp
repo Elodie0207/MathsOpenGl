@@ -74,6 +74,30 @@ void Poly::Draw(const Mat4 &viewProjMatrix) const {
 
 }
 
+std::vector<Point> Poly::GetLoopPoints() const
+{
+	std::vector<Point> points;
+	points.reserve(m_Points.size() + 1);
+	for(const auto& p : m_Points)
+	{
+		points.emplace_back(p.x, p.y);
+	}
+	points.emplace_back(m_Points[0].x, m_Points[0].y);
+	return points;
+}
+
+std::vector<Point> Poly::GetPoints() const
+{
+	std::vector<Point> points;
+	points.reserve(m_Points.size());
+	for(const auto& p : m_Points)
+	{
+		points.emplace_back(p.x, p.y);
+	}
+	return points;
+}
+
+
 Poly::~Poly() {
 
 }

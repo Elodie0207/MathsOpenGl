@@ -96,9 +96,14 @@ private:
 	void AddPointToPoly(Vec2Int screenPos);
 	void StopDrawingPoly();
 	Poly polyDrawn;
-	bool drawing = false;
+	bool drawingPoly = false;
 
 	/// === DRAW WINDOW ===
+	void ClearDrawnWindow();
+	void AddPointToWindow(Vec2Int screenPos);
+	void StopDrawingWindow();
+	Poly windowDrawn;
+	bool drawingWindow = false;
 
 	//TODO: Add function & variables to draw the window here.
 
@@ -114,8 +119,8 @@ private:
 	Tools m_Tool = Tools::MOVE;
 	Application* m_App;
 
-	DrawObject drawObj;
-	Quad quad;
+//	DrawObject drawObj;
+//	Quad quad;
 	float m_CameraSpeed = 0.6f;
     int color=0;
 

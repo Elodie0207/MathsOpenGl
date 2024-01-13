@@ -14,15 +14,19 @@ void ToolsHandler::SetTool(Tools tool)
 		case Tools::DRAW_POLYGONE:
 			ClearDrawnPoly();
 			break;
+		case Tools::DRAW_WINDOW:
+			ClearDrawnWindow();
+			break;
 	}
 }
 
 ToolsHandler::ToolsHandler(Application * app) : m_App(app)
 {
 	REI_ASSERT(m_App != nullptr, "The application is not valid.");
-	drawObj = DrawObject({{0,0}, { 0, 512}, { 512, 512}, { 512, 0}});
-	polyDrawn = Poly({{0, 0}, {0, 512}, {512, 512}});
-	quad = Quad(Vec2(512, 512), Vec2(512, 512));
+//	drawObj = DrawObject({{0,0}, { 0, 512}, { 512, 512}, { 512, 0}});
+	polyDrawn = Poly({{128, 128}, {128, 640}, {640, 640}});
+	windowDrawn = Poly({{0, 0}, {0, 512}, {512, 512}, {512, 0}});
+//	quad = Quad(Vec2(512, 512), Vec2(512, 512));
 }
 
 ToolsHandler::~ToolsHandler()
@@ -36,10 +40,14 @@ void ToolsHandler::Initialize() {
 
 
 	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
+//	drawObj.m_Color = Vec4(0.8,0.2,0.3,1);
+	polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
+	windowDrawn.m_Color = Vec4(0.8, 0.3, 0.2, 1);
+//	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
 }
 
-void ToolsHandler::Destroy() {
-
+void ToolsHandler::Destroy()
+{
 }
 
 bool ToolsHandler::OnUpdate(float deltaTime)
@@ -53,42 +61,36 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 		{
 			movement += Vec2(0, +frameMovement);
 		}
-		else if (m_App->GetKeyDown('Z')) // up
-		{
-			movement += Vec2(0, +(frameMovement * 2));
-		}
 
 		if (m_App->GetKeyDown('s')) // down
 		{
 			movement += Vec2(0, -frameMovement);
-		}
-		else if (m_App->GetKeyDown('S')) // down
-		{
-			movement += Vec2(0, -(frameMovement * 2));
 		}
 
 		if (m_App->GetKeyDown('d')) // right
 		{
 			movement += Vec2(+frameMovement, 0);
 		}
-		else if (m_App->GetKeyDown('D')) // right
-		{
-			movement += Vec2(+(frameMovement * 2), 0);
-		}
 
 		if (m_App->GetKeyDown('q')) // down
 		{
 			movement += Vec2(-frameMovement, 0);
-		}
-		else if (m_App->GetKeyDown('Q')) // down
-		{
-			movement += Vec2(-(frameMovement * 2), 0);
 		}
 
 		if (movement != Vec2(0.0)) {
 			m_App->GetCamera().MovePosition(movement);
 			return true;
 		}
+	}
+	else if(m_Tool == Tools::DRAW_POLYGONE && drawingPoly && m_App->GetKeyDown(27))
+	{
+		StopDrawingPoly();
+		return true;
+	}
+	else if(m_Tool == Tools::DRAW_WINDOW && drawingWindow && m_App->GetKeyDown(27))
+	{
+		StopDrawingWindow();
+		return true;
 	}
 	return false;
 }
@@ -109,7 +111,9 @@ void ToolsHandler::Draw(const Mat4 &ViewProjMatrix) {
 
     }
 	polyDrawn.Draw(ViewProjMatrix);
+	windowDrawn.Draw(viewProjMatrix);
 }
+
 static Vec2Int MousePosePressDraw;
 bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 {
@@ -123,6 +127,15 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 				return true;
 			} else if (mouse == MouseButton::Middle) {
 				StopDrawingPoly();
+				return true;
+			}
+			break;
+		case Tools::DRAW_WINDOW:
+			if(mouse == MouseButton::Left) {
+				AddPointToWindow(state.positionPressed);
+				return true;
+			} else if (mouse == MouseButton::Middle) {
+				StopDrawingWindow();
 				return true;
 			}
 			break;
@@ -178,8 +191,14 @@ bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 	switch (m_Tool) {
 		case Tools::DRAW_POLYGONE:
 		{
-			if(!drawing) break;
+			if(!drawingPoly) break;
 			polyDrawn.m_Points[polyDrawn.GetPointCount() - 1] = m_App->GetWorldMousePos();
+			return true;
+		}
+		case Tools::DRAW_WINDOW:
+		{
+			if(!drawingWindow) break;
+			windowDrawn.m_Points[windowDrawn.GetPointCount() - 1] = m_App->GetWorldMousePos();
 			return true;
 		}
 			break;
@@ -191,21 +210,21 @@ bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 void ToolsHandler::ClearDrawnPoly()
 {
 	polyDrawn.m_Points.clear();
-	polyDrawn.m_Points.push_back(m_App->GetWorldMousePos());
-	drawing = true;
+	polyDrawn.m_Points.emplace_back(m_App->GetWorldMousePos());
+	drawingPoly = true;
 }
 
 void ToolsHandler::StopDrawingPoly()
 {
-	if(polyDrawn.GetPointCount() > 3) {
+	if(drawingPoly && polyDrawn.GetPointCount() > 3) {
 		polyDrawn.m_Points.pop_back();
-		drawing = false;
+		drawingPoly = false;
 	}
 }
 
 void ToolsHandler::AddPointToPoly(Vec2Int screenPos)
 {
-	if(drawing)
+	if(drawingPoly)
 	{
 		auto worldPos = m_App->ScreenToWorldPos(screenPos);
 		Vec2Int firstWorldPos = polyDrawn.m_Points[0];
@@ -219,12 +238,58 @@ void ToolsHandler::AddPointToPoly(Vec2Int screenPos)
 			}
 			else if(polyDrawn.GetPointCount() == 1)
 			{
-				polyDrawn.m_Points.push_back(worldPos);
+				polyDrawn.m_Points.emplace_back(worldPos);
 			}
 		}
 		else
 		{
-			polyDrawn.m_Points.push_back(worldPos);
+			polyDrawn.m_Points.emplace_back(worldPos);
+		}
+	}
+	else
+	{
+		ClearDrawnPoly();
+	}
+}
+
+// ===================== DRAW WINDOW =====================
+void ToolsHandler::ClearDrawnWindow()
+{
+	windowDrawn.m_Points.clear();
+	windowDrawn.m_Points.emplace_back(m_App->GetWorldMousePos());
+	drawingWindow = true;
+}
+
+void ToolsHandler::StopDrawingWindow()
+{
+	if(drawingWindow && windowDrawn.GetPointCount() > 3) {
+		windowDrawn.m_Points.pop_back();
+		drawingWindow = false;
+	}
+}
+
+void ToolsHandler::AddPointToWindow(Vec2Int screenPos)
+{
+	if(drawingWindow)
+	{
+		auto worldPos = m_App->ScreenToWorldPos(screenPos);
+		Vec2Int firstWorldPos = windowDrawn.m_Points[0];
+		float distanceToLast = Math::Distance<Vec2>(firstWorldPos, worldPos);
+		REI_INFO("Distance To First {0}", distanceToLast);
+		if(distanceToLast < 10) // Same place
+		{
+			if(windowDrawn.GetPointCount() > 3)
+			{
+				StopDrawingPoly();
+			}
+			else if(windowDrawn.GetPointCount() == 1)
+			{
+				windowDrawn.m_Points.emplace_back(worldPos);
+			}
+		}
+		else
+		{
+			windowDrawn.m_Points.emplace_back(worldPos);
 		}
 	}
 	else
