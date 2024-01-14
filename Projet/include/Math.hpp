@@ -81,14 +81,14 @@ public:
 
 	static Mat4 Inverse(Mat4 mat);
 	static bool CyrusBeck(double X1, double Y1, double X2, double Y2, std::vector<Point> Poly, std::vector<Point> Normale, int Nbsom);
-	static double coupe(const Point& a, const Point& b, const Point& c);
+    static double coupe(Point S, Point Pj, Point Fi, Point Fi1);
 	static Point intersection(const Point& a, const Point& b, const Point& c, const Point& d);
-	static std::vector<Point> sutherlandHodgman(std::vector<Point> PL, const std::vector<Point>& PW);
 
+    static std::vector<Point> sutherlandHodgman(std::vector<Point> PL, std::vector<Point> PW);
 
 	static void polygon_fill(const std::vector<Point>& poly, Application& app, const Color& color_fill);
 	static void fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill);
-
+    static bool visible(Point S, Point Fi, Point Fi1);
 
 	/**
 	 * @brief Calculates the smallest integer value greater than or equal to the given value.
@@ -145,6 +145,9 @@ public:
 	{
 		return glm::round(value);
 	}
+
+
+
 };
 
 template<> inline std::string Math::ToString(const float& value) { return std::to_string(value); }

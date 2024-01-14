@@ -94,9 +94,11 @@ bool Math::CyrusBeck(double X1, double Y1, double X2, double Y2, std::vector<Poi
 	}
 }
 
-double Math:: coupe(const Point& a, const Point& b, const Point& c) {
-    return (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
+double Math:: coupe(Point S, Point Pj, Point Fi, Point Fi1) {
+    double crossProduct = (Pj.x - S.x) * (Fi1.y - Fi.y) - (Pj.y - S.y) * (Fi1.x - Fi.x);
+    return crossProduct < 0;
 }
+
 
 Point Math:: intersection(const Point& a, const Point& b, const Point& c, const Point& d) {
     double ua = ((d.x - c.x) * (a.y - c.y) - (d.y - c.y) * (a.x - c.x)) /
@@ -105,57 +107,52 @@ Point Math:: intersection(const Point& a, const Point& b, const Point& c, const 
     return intersection_point;
 }
 
+bool Math::visible(Point S, Point Fi, Point Fi1){
+    double crossProduct = (Fi1.x - Fi.x) * (S.y - Fi.y) - (Fi1.y - Fi.y) * (S.x - Fi.x);
+    return crossProduct >= 0;
+}
 
-std::vector<Point> Math::sutherlandHodgman(std::vector<Point> PL, const std::vector<Point>& PW) {
-    std::vector<Point> PS;
-    for (size_t i = 0; i < PW.size() - 1; ++i) {
-        size_t N2 = 0;
-        PS.clear();
+std::vector<Point> Math::sutherlandHodgman(std::vector<Point> PL, std::vector<Point> PW) {
+    std::vector<Point> result;
+
+    for (int i = 0; i < PW.size(); ++i) {
+        int N2 = 0;
+        std::vector<Point> PS;
+
         Point S, F, I;
-        for (size_t j = 0; j < PL.size(); ++j) {
-            if (j == 0) {
-                F = PL[j];
-            } else {
-                if (coupe(S, PL[j], PW[i]) >= 0) {
-                    if (coupe(S, PL[j], PW[i + 1]) < 0) {
-                        I = intersection(S, PL[j], PW[i], PW[i + 1]);
-                        PS.push_back(I);
-                        ++N2;
-                    }
-                } else {
-                    if (coupe(S, PL[j], PW[i + 1]) >= 0) {
-                        I = intersection(S, PL[j], PW[i], PW[i + 1]);
-                        PS.push_back(I);
-                        ++N2;
-                    }
-                }
-            }
-            S = PL[j];
-            if (coupe(S, PW[i], PW[i + 1]) >= 0) {
-                PS.push_back(S);
-                ++N2;
-            }
-        }
-        if (N2 > 0) {
-            if (coupe(S, F, PW[i]) >= 0) {
-                if (coupe(S, F, PW[i + 1]) < 0) {
-                    I = intersection(S, F, PW[i], PW[i + 1]);
-                    PS.push_back(I);
-                    ++N2;
-                }
-            } else {
-                if (coupe(S, F, PW[i + 1]) >= 0) {
-                    I = intersection(S, F, PW[i], PW[i + 1]);
-                    PS.push_back(I);
-                    ++N2;
-                }
-            }
-            PL.clear();
-            PL = PS;
 
+        for (int j = 0; j < PL.size(); ++j) {
+            if (j == 0) {
+                F = PL.back();
+            } else {
+                if (coupe(S, PL[j], PW[i], PW[(i + 1) % PW.size()])) {
+                    I = intersection(S, PL[j], PW[i], PW[(i + 1) % PW.size()]);
+                    PS.push_back(I);
+                    N2++;
+                }
+            }
+
+            S = PL[j];
+
+            if (visible(S, PW[i], PW[(i + 1) % PW.size()])) {
+                PS.push_back(S);
+                N2++;
+            }
         }
+
+        if (N2 > 0) {
+            if (coupe(S, F, PW[i], PW[(i + 1) % PW.size()])) {
+                I = intersection(S, F, PW[i], PW[(i + 1) % PW.size()]);
+                PS.push_back(I);
+                N2++;
+            }
+        }
+
+
+        result.insert(result.end(), PS.begin(), PS.end());
     }
-    return PS;
+
+    return result;
 }
 
 /*

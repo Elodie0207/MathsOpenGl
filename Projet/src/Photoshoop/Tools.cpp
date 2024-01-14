@@ -158,21 +158,43 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			}
 		}
 		break;
-		case Tools::WINDOWING:
-		{
-			if(polyDrawn.GetPointCount() > 2 && windowDrawn.GetPointCount() > 2)
-			{
-				auto points = Math::sutherlandHodgman(polyDrawn.GetLoopPoints(), windowDrawn.GetLoopPoints());
-				windowedPoly.m_Points.clear();
-				for(const auto& p : points)
-				{
-					windowedPoly.m_Points.emplace_back(p.x, p.y);
-				}
-			}
-		}
-		break;
-	}
-	return false;
+        case Tools::WINDOWING: {
+            if (polyDrawn.GetPointCount() > 2 && windowDrawn.GetPointCount() > 2) {
+                auto poly = polyDrawn.GetLoopPoints();
+                auto window = windowDrawn.GetLoopPoints();
+                auto clippedPoints = Math::sutherlandHodgman(poly, window);
+
+                windowedPoly.m_Points.clear();
+
+                std::cout << "Original Polygon Points:" << std::endl;
+                for (const auto &p: poly) {
+                    std::cout << "(" << p.x << ", " << p.y << ")" << std::endl;
+                }
+
+                std::cout << "Window Points:" << std::endl;
+                for (const auto &p: window) {
+                    std::cout << "(" << p.x << ", " << p.y << ")" << std::endl;
+                }
+
+                std::cout << "Intermediate Clipped Polygon Points:" << std::endl;
+                for (const auto &p: clippedPoints) {
+                    std::cout << "(" << p.x << ", " << p.y << ")" << std::endl;
+                }
+
+                std::cout << "Clipped Polygon Points:" << std::endl;
+                if (!clippedPoints.empty()) {
+                    for (const auto &p: clippedPoints) {
+                        windowedPoly.m_Points.emplace_back(p.x, p.y);
+                        std::cout << "\033[32m(" << p.x << ", " << p.y << ")\033[0m" << std::endl;
+                    }
+                } else {
+                    std::cout << "No clipped points (Polygon outside the window)" << std::endl;
+                }
+            }
+        }
+            break;
+    }
+    return false;
 }
 
 bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
