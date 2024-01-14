@@ -155,6 +155,9 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			if(mouse == MouseButton::Left) {
 				MousePosePressDraw = state.positionPressed;
 				Math::polygon_fill(polyDrawn.GetPoints(), *m_App, Parameters::GetColor());
+
+				// TODO: get from the window the min and max (i.e. bounding box)
+				// TODO: launch using the 'MousePosePressDraw' (x/y) and min max with the 'Math::fillRegionConnexity4'.
 			}
 		}
 		break;
