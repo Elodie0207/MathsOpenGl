@@ -77,6 +77,9 @@ public:
 
 	[[nodiscard]] Vec2Int GetTextureIndex(Vec2 worldPos) const;
 	[[nodiscard]] PixelData GetTextureInfo(Vec2 worldPos) const;
+
+	void DrawWorldPoint(Vec2 position, float duration = 1, Color color = Color(1,1,1,1));
+	void DrawWorldLine(Vec2 from, Vec2 to, float duration = 1, Color color = Color(1,1,1,1));
 private:
 	static void StaticRender(void* appPtr);
 	static void StaticUpdate(int timerId, void *appPtr);
@@ -136,4 +139,5 @@ private:
 	std::unordered_map<Vec2Int, Ref<Texture>> m_Textures;
 //	std::unordered_map<Vec2Int, std::unordered_map<Vec2Int, Vec4>> m_PixelCache;
 	std::vector<Quad> m_TextureObjects;
+	std::vector<std::tuple<Poly, double>> m_Lines;
 };

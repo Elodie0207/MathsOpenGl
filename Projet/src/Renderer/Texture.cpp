@@ -306,7 +306,7 @@ Texture::Texture(Vec3 color, int width, int height, Texture2DSpecification textu
 		pixels[(i * pixelSize) + (1 * channelSize)] = c.y;
 		pixels[(i * pixelSize) + (2 * channelSize)] = c.z;
 	}
-   
+
 	m_TextureSpecification.image = pixels.data();
 
 	Create();

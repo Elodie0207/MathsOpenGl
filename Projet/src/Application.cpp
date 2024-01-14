@@ -333,6 +333,22 @@ void Application::Render() {
 
 	m_Tools.Draw(viewProj);
 
+	int toRemove = -1;
+	for (int i = 0; i < m_Lines.size(); ++i)
+	{
+		std::get<Poly>(m_Lines[i]).Draw(viewProj);
+
+		if(i > toRemove && std::get<double>(m_Lines[i]) >= GetTime())
+		{
+			toRemove = i;
+		}
+	}
+
+	if(toRemove > -1)
+	{
+		m_Lines.erase(m_Lines.begin(), m_Lines.begin() + toRemove);
+	}
+
 	glFlush();
 }
 
@@ -510,4 +526,16 @@ Ref<Texture> Application::GetOrCreateTexture(Vec2Int index)
 	}
 
 	return texture;
+}
+
+void Application::DrawWorldPoint(Vec2 position, float duration, Color color) {
+
+	auto tuple = m_Lines.emplace_back(Poly({position}), GetTime() + duration);
+	std::get<Poly>(tuple).m_Color = color;
+}
+
+void Application::DrawWorldLine(Vec2 from, Vec2 to, float duration, Color color) {
+
+	auto tuple = m_Lines.emplace_back(Poly({from, to}), GetTime() + duration);
+	std::get<Poly>(tuple).m_Color = color;
 }
