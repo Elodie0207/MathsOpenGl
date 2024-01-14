@@ -160,9 +160,9 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 		break;
         case Tools::WINDOWING: {
             if (polyDrawn.GetPointCount() > 2 && windowDrawn.GetPointCount() > 2) {
-                auto poly = polyDrawn.GetLoopPoints();
+                auto poly = polyDrawn.GetPoints();
                 auto window = windowDrawn.GetLoopPoints();
-                auto clippedPoints = Math::sutherlandHodgman(poly, window);
+                auto clippedPoints = Math::sutherlandHodgman(poly, window, *m_App);
 
                 windowedPoly.m_Points.clear();
 

@@ -51,6 +51,10 @@ public:
 	inline const Camera& GetCamera() const { return m_Camera; }
 	inline Camera& GetCamera() { return m_Camera; }
 
+	/**
+	 *
+	 * @return
+	 */
 	[[nodiscard]] double GetTime() const;
 	[[nodiscard]] bool GetKeyDown(char key) const;
 	[[nodiscard]] KeyState GetKeyState(char key) const;

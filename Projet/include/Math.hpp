@@ -72,6 +72,18 @@ public:
 		return glm::max(v1, v2);
 	}
 
+	template<typename T>
+	inline static T Cross(const T& v1, const T& v2)
+	{
+		return glm::cross(v1, v2);
+	}
+
+	template<typename T>
+	inline static T Dot(const T& v1, const T& v2)
+	{
+		return glm::dot(v1, v2);
+	}
+
 	static Mat4 TRS(Vec3 position);
 	static Mat4 TRS(Vec3 position, Quat rotation);
 	static Mat4 TRS(Vec3 position, Vec3 scale);
@@ -83,12 +95,13 @@ public:
 	static bool CyrusBeck(double X1, double Y1, double X2, double Y2, std::vector<Point> Poly, std::vector<Point> Normale, int Nbsom);
     static double coupe(Point S, Point Pj, Point Fi, Point Fi1);
 	static Point intersection(const Point& a, const Point& b, const Point& c, const Point& d);
+	static bool intersection(const Point& a, const Point& b, const Point& c, const Point& d, Point& intersection);
 
-    static std::vector<Point> sutherlandHodgman(std::vector<Point> PL, std::vector<Point> PW);
+    static std::vector<Point> sutherlandHodgman(std::vector<Point> PL, std::vector<Point> PW, Application& app);
 
 	static void polygon_fill(const std::vector<Point>& poly, Application& app, const Color& color_fill);
 	static void fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill);
-    static bool visible(Point S, Point Fi, Point Fi1);
+    static bool visible(Point S, Point Fi, Point Fi1, Point centroid);
 
 	/**
 	 * @brief Calculates the smallest integer value greater than or equal to the given value.

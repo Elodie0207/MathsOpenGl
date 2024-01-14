@@ -286,7 +286,8 @@ void Application::OnMouseWheel(int wheel, int direction, int mouseX, int mouseY)
 }
 
 double Application::GetTime() const {
-	return glutGet(GLUT_ELAPSED_TIME);
+	auto glutTime = glutGet(GLUT_ELAPSED_TIME);
+	return ((double)glutTime) / 1000.0;
 }
 
 bool Application::GetKeyDown(char key) const
@@ -334,11 +335,14 @@ void Application::Render() {
 	m_Tools.Draw(viewProj);
 
 	int toRemove = -1;
+	auto time= GetTime();
 	for (int i = 0; i < m_Lines.size(); ++i)
 	{
 		std::get<Poly>(m_Lines[i]).Draw(viewProj);
 
-		if(i > toRemove && std::get<double>(m_Lines[i]) >= GetTime())
+
+		auto lineTime = std::get<double>(m_Lines[i]);
+		if(i > toRemove && lineTime <= time)
 		{
 			toRemove = i;
 		}
@@ -354,7 +358,7 @@ void Application::Render() {
 
 void Application::Update()
 {
-	if(m_Tools.OnUpdate(m_UpdateDeltaTime))
+	if(m_Tools.OnUpdate(m_UpdateDeltaTime) || !m_Lines.empty())
 	{
 		Redraw();
 	}
