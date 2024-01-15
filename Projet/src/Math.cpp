@@ -240,13 +240,13 @@ std::vector<Color> colors = {{173.0f/255.0f,183.0f/255.0f,0.0f/255.0f,1.0f},
 
 
 std::vector<Point> Math::sutherlandHodgman(std::vector<Point> PL, std::vector<Point> PW, Application& app) {
-	Point centroid;
+	Point centroid = {0,0};
 	for (const auto& i : PW) {
 		centroid += i;
 	}
 	centroid /= PW.size();
 
-    std::vector<Point> result;
+    std::vector<Point> result = {};
 	int colorUsed = 0;
 
     for (int i = 0; i < PW.size()-1; ++i) {
