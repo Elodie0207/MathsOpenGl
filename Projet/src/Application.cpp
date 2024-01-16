@@ -119,11 +119,17 @@ void Application::Run() {
 }
 
 void Application::CreateMenu() {
-	glutCreateMenuUcall(Application::StaticMenu, this);
+    static int returnsubmenucolor4;
 
-	// Ajout des entrées dans le menu
+
+    returnsubmenucolor4 = glutCreateMenuUcall(Application::StaticMenu,this);
+    glutAddMenuEntry("Red", (int)(Tools::RED));
+    glutAddMenuEntry("Yellow",(int)Tools::YELLOW);
+    glutAddMenuEntry("Blue",(int) Tools::BLUE);
+
+	glutCreateMenuUcall(Application::StaticMenu, this);
 	glutAddMenuEntry("move", (int)Tools::MOVE);
-    glutAddMenuEntry("couleurs", (int)Tools::CHANGE_COLOR);
+    glutAddSubMenu("couleurs",returnsubmenucolor4); //;
 	glutAddMenuEntry("trace polygone", (int)Tools::DRAW_POLYGONE);
 	glutAddMenuEntry("trace fenetre", (int)Tools::DRAW_WINDOW);
 	glutAddMenuEntry("fenetrage", (int)Tools::WINDOWING);
@@ -144,12 +150,19 @@ void Application::Menu(int value)
 	auto tool = (Tools)value;
 
 	switch (tool) {
-		case Tools::CHANGE_COLOR:
+		case Tools::RED:
 
-            m_Tools.CHANGE_COLOR();
+            m_Tools.CHANGE_COLOR(Tools::RED);
 			m_Tools.SetTool(Tools::NONE);
-			//TODO: set back to the previous tools once the color has been selected/changed.
 			break;
+        case Tools::BLUE:
+            m_Tools.CHANGE_COLOR(Tools::BLUE);
+            m_Tools.SetTool(Tools::NONE);
+            break;
+        case Tools::YELLOW:
+            m_Tools.CHANGE_COLOR(Tools::YELLOW);
+            m_Tools.SetTool(Tools::NONE);
+            break;
 		default:
 			m_Tools.SetTool(tool);
 			break;

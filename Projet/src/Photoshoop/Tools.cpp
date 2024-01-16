@@ -95,14 +95,14 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 void ToolsHandler::Draw(const Mat4 &viewProjMatrix) {
 //	drawObj.Draw(viewProjMatrix);
 //	quad.Draw(viewProjMatrix);
-    if(color==0) {
-        polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
+    if(color==1) {
+        polyDrawn.m_Color = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
     }
-    else if(color==1) {
-        polyDrawn.m_Color = Vec4(0.2f, 0.8f, 0.3f, 1.0f);
+    else if(color==2) {
+        polyDrawn.m_Color = Vec4(1.0f, 1.0f, 0.0f, 1.0f);
     }
-    else if(color==2){
-        polyDrawn.m_Color= Vec4(0.8f, 0.3f, 0.2f, 1.0f);
+    else if(color==3){
+        polyDrawn.m_Color= Vec4(0.0f, 0.0f, 1.0f, 1.0f);
     }
 	polyDrawn.Draw(viewProjMatrix);
 	windowDrawn.Draw(viewProjMatrix);
@@ -369,13 +369,18 @@ void ToolsHandler::AddPointToWindow(Vec2Int screenPos)
 	}
 }
 
-void ToolsHandler::CHANGE_COLOR() {;
-
-    int userchoice;
-    REI_INFO("0 for blue, 1 for green, 2 for red");
-    std::cin >> userchoice;
-    REI_INFO(userchoice);
-    color=userchoice;
+void ToolsHandler::CHANGE_COLOR(Tools colorTool) {
+    if (colorTool == Tools::RED) {
+        color = 1;
+    } else if (colorTool == Tools::YELLOW) {
+        color = 2;
+    } else if (colorTool == Tools::BLUE) {
+        color = 3;
+    }
 }
+
+
+
+
 
 

@@ -16,19 +16,20 @@ enum class Tools
 {
 	NONE,
 	MOVE,
-	CHANGE_COLOR,
 	DRAW_POLYGONE,
 	DRAW_WINDOW,
 	WINDOWING,
 	FILLING,
     RED,
     BLUE,
-    GREEN
+    YELLOW
+
 };
 
 class ToolsHandler {
 public:
-	ToolsHandler(Application *);
+
+    ToolsHandler(Application *);
 
 	~ToolsHandler();
 
@@ -89,7 +90,7 @@ public:
     /**
 	 * Function called each time the user wants to change the color.
 	 */
-    void CHANGE_COLOR();
+    void CHANGE_COLOR(Tools color);
 private:
 	/// === MOVEMENT ===
 
@@ -131,6 +132,5 @@ private:
 //	Quad quad;
 	float m_CameraSpeed = 0.6f;
     int color=0;
-
 
 };
