@@ -50,4 +50,4 @@ elseif(CMAKE_BUILD_TYPE MATCHES "[Dd][Ii][Ss][Tt]")
 endif()
 target_compile_definitions(MathsOpenGl PUBLIC REI_SIMPLE_FUNC)
 
-target_link_libraries(MathsOpenGl PUBLIC glfw ${OPENGL_gl_LIBRARY} freeglut_static glm spdlog::spdlog_header_only)
+target_link_libraries(MathsOpenGl PUBLIC glad glfw glm spdlog::spdlog_header_only imgui)

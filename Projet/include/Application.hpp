@@ -6,8 +6,8 @@
 
 #include "Core.hpp"
 
-#include <GLFW/glfw3.h>
-#include <GL/freeglut.h>
+#include <glad/glad.h>
+
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -17,12 +17,23 @@
 #include "Photoshoop/Tools.hpp"
 #include "Renderer/Texture.hpp"
 
+#ifndef GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_NONE 1
+#endif
+
+enum GLFWKeyState : int {
+	PRESS = GLFW_PRESS,
+	RELEASE = GLFW_RELEASE,
+	REPEAT = GLFW_REPEAT,
+};
+
 struct ApplicationSpecification
 {
     ApplicationSpecification(int argc, char** argv);
     std::string name = "MathProject";
     uint32_t width = 1600;
     uint32_t height = 900;
+	bool minified = false;
     int argc;
     char** argv;
 };
@@ -85,6 +96,8 @@ public:
 	void DrawWorldPoint(Vec2 position, float duration = 1, Color color = Color(1,1,1,1));
 	void DrawWorldLine(Vec2 from, Vec2 to, float duration = 1, Color color = Color(1,1,1,1));
 private:
+	static void glfw_error_callback(int error, const char* description);
+	/*
 	static void StaticRender(void* appPtr);
 	static void StaticUpdate(int timerId, void *appPtr);
 	static void StaticMenu(int value, void* appPtr);
@@ -96,6 +109,7 @@ private:
 	static void StaticOnMouseWheel(int wheel, int direction, int mouseX, int mouseY, void* appPtr);
 
 	void Menu(int value);
+	 */
 	void OnResize(int width, int height);
 	void OnKeyDown(char key, int mouseX, int mouseY);
 	void OnKeyUp(char key, int mouseX, int mouseY);
@@ -104,15 +118,14 @@ private:
 	void OnMouseWheel(int wheel, int direction, int mouseX, int mouseY);
 
 	void Initialize();
+
 	void CreateMenu();
+
 	void Exit();
-	void Redraw();
 
 	void Render();
 	void Update();
-
-	void UpdateDeltaTime(double& Time, float& DeltaTime);
-
+	void Menu();
 
 
 	void CreateTextures();
@@ -144,4 +157,5 @@ private:
 //	std::unordered_map<Vec2Int, std::unordered_map<Vec2Int, Vec4>> m_PixelCache;
 	std::vector<Quad> m_TextureObjects;
 	std::vector<std::tuple<Poly, double>> m_Lines;
+	GLFWwindow* m_Window = nullptr;
 };

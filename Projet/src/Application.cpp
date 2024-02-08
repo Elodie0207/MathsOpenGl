@@ -2,15 +2,27 @@
 // Created by ianpo on 29/12/2023.
 //
 
+#define NOMINMAX
+
 #include "Core.hpp"
 #include "Application.hpp"
 #include "Parameters.hpp"
 #include <functional>
 
+#ifndef GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_NONE 1
+#endif
+#define IMGUI_IMPL_OPENGL_LOADER_CUSTOM 1
+
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_glfw.h>
+#include <GLFW/glfw3.h>
+
 #define CallNextUpdate(appPtr) glutTimerFuncUcall(1000 / 60, &Application::StaticUpdate, 0, appPtr);
 
 ApplicationSpecification::ApplicationSpecification(int argc, char **argv) : argc(argc), argv(argv) {}
-
+/*
 void Application::StaticRender(void* appPtr)
 {
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
@@ -70,77 +82,293 @@ void Application::StaticOnMouseWheel(int wheel, int direction, int mouseX, int m
 	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
 	static_cast<Application *>(appPtr)->OnMouseWheel(wheel, direction, mouseX, mouseY);
 }
-
+*/
 Application::Application(ApplicationSpecification appSpec) :
-	m_AppSpec(std::move(appSpec)),
-	m_Camera(m_AppSpec.width, m_AppSpec.height),
-	m_Tools(this),
-	m_TexWidth(m_AppSpec.width),
-	m_TexHeight(m_AppSpec.height)
+		m_AppSpec(std::move(appSpec)),
+		m_Camera(m_AppSpec.width, m_AppSpec.height),
+		m_Tools(this),
+		m_TexWidth(m_AppSpec.width),
+		m_TexHeight(m_AppSpec.height)
 {
 	REI_ASSERT(m_AppSpec.width > 0 && m_AppSpec.height > 0, "The Aspect Ration ({0}/{1}) is no valid.", m_AppSpec.width, m_AppSpec.height);
-	glutInit(&m_AppSpec.argc, m_AppSpec.argv);
-	glutInitWindowSize(static_cast<int>(m_AppSpec.width), static_cast<int>(m_AppSpec.height));
-	glutCreateWindow(m_AppSpec.name.c_str());
+
+
+	glfwSetErrorCallback(glfw_error_callback);
+	if (!glfwInit())
+	{
+		REI_ERROR("GLFW did not initialized.");
+		return;
+	}
+
+	// Decide GL+GLSL versions
+	// GL 3.0 + GLSL 130
+	const char* glsl_version = "#version 460";
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+
+	// Create window with graphics context
+	m_Window = glfwCreateWindow(static_cast<int>(m_AppSpec.width), static_cast<int>(m_AppSpec.height), m_AppSpec.name.c_str(), nullptr, nullptr);
+	if (m_Window == nullptr) {
+		REI_ERROR("GLFW did not initialized.");
+		return;
+	}
+
+	glfwMakeContextCurrent(m_Window);
+	int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+	printf("glad loading status: %d\n", status);
 
 	REI_INFO("OpenGL Info:");
 	REI_INFO("  Vendor: {0}", (const char*)glGetString(GL_VENDOR));
 	REI_INFO("  Renderer: {0}", (const char*)glGetString(GL_RENDERER));
 	REI_INFO("  Version: {0}", (const char*)glGetString(GL_VERSION));
 
+	glfwSwapInterval(1); // Enable vsync
 	Initialize();
 }
 
-Application::~Application() {}
+Application::~Application() {
+	// Cleanup
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	glfwDestroyWindow(m_Window);
+	glfwTerminate();
+}
 
 void Application::Initialize() {
 	glEnable(GL_TEXTURE_2D);
 	glLineWidth(5.0f);
 	glPointSize(5.0f);
 
-	m_Tools.Initialize();
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
+	//io.ConfigViewportsNoAutoMerge = true;
+	//io.ConfigViewportsNoTaskBarIcon = true;
 
-	glutDisplayFuncUcall(&Application::StaticRender, this);
-	glutTimerFuncUcall(1000 / 60, &Application::StaticUpdate, 0, this);;
-	glutReshapeFuncUcall(&Application::StaticOnResize, this);
-	glutKeyboardFuncUcall(&Application::StaticOnKeyDown, this);
-	glutKeyboardUpFuncUcall(&Application::StaticOnKeyUp, this);
-	glutMouseFuncUcall(&Application::StaticOnMouseButton, this);
-	glutMotionFuncUcall(&Application::StaticOnMouseMotion, this);
-	glutPassiveMotionFuncUcall(&Application::StaticOnMouseMotion, this);
-	glutMouseWheelFuncUcall(&Application::StaticOnMouseWheel, this);
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsLight();
+
+	// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+	ImGuiStyle& style = ImGui::GetStyle();
+	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		style.WindowRounding = 0.0f;
+		style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+	}
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
+	ImGui_ImplOpenGL3_Init("#version 460");
+	m_Tools.Initialize();
+	glfwSetWindowUserPointer(m_Window, this);
+
+	glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+	{
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		data.OnResize(width, height);
+	});
+
+	glfwSetWindowIconifyCallback(m_Window, [](GLFWwindow* window, int iconify)
+	{
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		data.m_AppSpec.minified = iconify == GLFW_TRUE;
+	});
+
+	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+	{
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		const auto& mousePos = data.m_MousePos;
+
+		switch ((GLFWKeyState)action) {
+			case GLFWKeyState::PRESS:
+			{
+				data.OnKeyDown(key, mousePos.x, mousePos.y);
+				break;
+			}
+			case GLFWKeyState::RELEASE:
+			{
+				data.OnKeyUp(key, mousePos.x, mousePos.y);
+				break;
+			}
+		}
+	});
+
+	glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods){
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		const auto& mousePos = data.m_MousePos;
+		data.OnMouseButton((MouseButton)button, (MousePressState)action, mousePos.x, mousePos.y);
+	});
+
+	glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset){
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		const auto& mousePos = data.m_MousePos;
+		data.OnMouseWheel(0, yoffset, mousePos.x, mousePos.y);
+	});
+
+	glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos){
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		data.OnMouseMotion(xpos, ypos);
+	});
+
+	// Old
+	/*
 	CreateMenu();
+	 */
 
 	CreateTextures();
 }
 
 void Application::Run() {
-	glutMainLoop();
+
+	// Our state
+	bool show_demo_window = true;
+	ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+	ImGuiIO& io = ImGui::GetIO();
+
+	while(!glfwWindowShouldClose(m_Window))
+	{
+		auto time = glfwGetTime();
+		m_UpdateDeltaTime = static_cast<float>(time - m_UpdateTime);
+		m_UpdateTime = time;
+		m_RenderDeltaTime = static_cast<float>(time - m_RenderTime);
+		m_RenderTime = time;
+
+		glfwPollEvents();
+
+		// Start the Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+
+		Menu();
+
+		Update();
+
+		// Rendering
+		ImGui::Render();
+
+		int display_w, display_h;
+		glfwGetFramebufferSize(m_Window, &display_w, &display_h);
+		glViewport(0, 0, display_w, display_h);
+		glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		Render();
+
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// Update and Render additional Platform Windows
+		// (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
+		//  For this specific demo app we could also call glfwMakeContextCurrent(window) directly)
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
+
+		glfwSwapBuffers(m_Window);
+	}
 }
 
-void Application::CreateMenu() {
-    static int returnsubmenucolor4;
+//void Application::CreateMenu() {
+//    static int returnsubmenucolor4;
+//
+//
+//    returnsubmenucolor4 = glutCreateMenuUcall(Application::StaticMenu,this);
+//    glutAddMenuEntry("Red", (int)(Tools::RED));
+//    glutAddMenuEntry("Yellow",(int)Tools::YELLOW);
+//    glutAddMenuEntry("Blue",(int) Tools::BLUE);
+//
+//	glutCreateMenuUcall(Application::StaticMenu, this);
+//	glutAddMenuEntry("move", (int)Tools::MOVE);
+//    glutAddSubMenu("couleurs",returnsubmenucolor4); //;
+//	glutAddMenuEntry("trace polygone", (int)Tools::DRAW_POLYGONE);
+//	glutAddMenuEntry("trace fenetre", (int)Tools::DRAW_WINDOW);
+//	glutAddMenuEntry("fenetrage", (int)Tools::WINDOWING);
+//	glutAddMenuEntry("remplissage", (int)Tools::FILLING);
+//	glutAddMenuEntry("Exit", -1);
+//
+//	glutAttachMenu(GLUT_RIGHT_BUTTON);
+//}
 
-
-    returnsubmenucolor4 = glutCreateMenuUcall(Application::StaticMenu,this);
-    glutAddMenuEntry("Red", (int)(Tools::RED));
-    glutAddMenuEntry("Yellow",(int)Tools::YELLOW);
-    glutAddMenuEntry("Blue",(int) Tools::BLUE);
-
-	glutCreateMenuUcall(Application::StaticMenu, this);
-	glutAddMenuEntry("move", (int)Tools::MOVE);
-    glutAddSubMenu("couleurs",returnsubmenucolor4); //;
-	glutAddMenuEntry("trace polygone", (int)Tools::DRAW_POLYGONE);
-	glutAddMenuEntry("trace fenetre", (int)Tools::DRAW_WINDOW);
-	glutAddMenuEntry("fenetrage", (int)Tools::WINDOWING);
-	glutAddMenuEntry("remplissage", (int)Tools::FILLING);
-	glutAddMenuEntry("Exit", -1);
-
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
-}
-
-void Application::Menu(int value)
+void Application::Menu()
 {
+	ImGui::Begin("Tools");
+	{
+		if(ImGui::CollapsingHeader("Colors"))
+		{
+			if(ImGui::Button("Red"))
+			{
+				m_Tools.CHANGE_COLOR(Tools::RED);
+				m_Tools.SetTool(Tools::NONE);
+			}
+			if(ImGui::Button("Yellow"))
+			{
+				m_Tools.CHANGE_COLOR(Tools::YELLOW);
+				m_Tools.SetTool(Tools::NONE);
+			}
+			if(ImGui::Button("Blue"))
+			{
+				m_Tools.CHANGE_COLOR(Tools::BLUE);
+				m_Tools.SetTool(Tools::NONE);
+			}
+		}
+
+		static std::vector<std::string> tools = { "NONE",
+												  "MOVE",
+												  "DRAW_POLYGONE",
+												  "DRAW_WINDOW",
+												  "WINDOWING",
+												  "FILLING"};
+
+		auto tool = m_Tools.GetSelectedTool();
+		auto toolIndex = (int)tool;
+		std::string currentTargetImage = tools[toolIndex];
+		if (ImGui::BeginCombo("Tool", currentTargetImage.c_str())) {
+			for (int i = 0; i < tools.size(); i++) {
+				const bool is_selected = (toolIndex == i);
+				std::string iImage = tools[toolIndex];
+				if (ImGui::Selectable(iImage.c_str(), is_selected)) {
+					toolIndex = i;
+					m_Tools.SetTool((Tools)i);
+				}
+
+				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+				if (is_selected) ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		ImGui::End();
+	}
+	/*
+
+
+//    glutAddMenuEntry("Red", (int)(Tools::RED));
+//    glutAddMenuEntry("Yellow",(int)Tools::YELLOW);
+//    glutAddMenuEntry("Blue",(int) Tools::BLUE);
+//
+//	glutCreateMenuUcall(Application::StaticMenu, this);
+//	glutAddMenuEntry("move", (int)Tools::MOVE);
+//    glutAddSubMenu("couleurs",returnsubmenucolor4); //;
+//	glutAddMenuEntry("trace polygone", (int)Tools::DRAW_POLYGONE);
+//	glutAddMenuEntry("trace fenetre", (int)Tools::DRAW_WINDOW);
+//	glutAddMenuEntry("fenetrage", (int)Tools::WINDOWING);
+//	glutAddMenuEntry("remplissage", (int)Tools::FILLING);
+//	glutAddMenuEntry("Exit", -1);
+
 	if(value == -1) {
 		REI_INFO("Press 'Tools::EXIT'.");
 		Exit();
@@ -169,12 +397,14 @@ void Application::Menu(int value)
 	}
 
 	Redraw();
+	 */
+
 }
 
 void Application::Exit()
 {
 	m_Tools.Destroy();
-	glutExit();
+	glfwSetWindowShouldClose(m_Window, true);
 }
 
 void Application::OnResize(int width, int height)
@@ -183,15 +413,7 @@ void Application::OnResize(int width, int height)
 	m_AppSpec.height = height > 0 ? height : 1;
 	m_Camera.ChangeAspectRatio(m_AppSpec.width, m_AppSpec.height);
 	glViewport(0,0,m_AppSpec.width, m_AppSpec.height);
-	Redraw();
-}
-
-void Application::UpdateDeltaTime(double& Time, float& DeltaTime)
-{
-	int timeInMs = glutGet(GLUT_ELAPSED_TIME);
-	double timeInS = timeInMs / 1000.0;
-	DeltaTime = static_cast<float>(timeInS - Time);
-	Time = timeInS;
+//	Redraw();
 }
 
 void Application::OnKeyDown(char key, int mouseX, int mouseY)
@@ -220,8 +442,6 @@ void Application::OnKeyDown(char key, int mouseX, int mouseY)
 	{
 		//TODO: Handling OnKeyPressRepeat
 	}
-
-
 }
 
 void Application::OnKeyUp(char key, int mouseX, int mouseY)
@@ -254,19 +474,13 @@ void Application::OnMouseButton(MouseButton button, MousePressState state, int m
 	{
 		mouseState.timePressed = GetTime();
 		mouseState.positionPressed = mousePos;
-		if(m_Tools.OnMouseClick(button, mouseState))
-		{
-			Redraw();
-		}
+		m_Tools.OnMouseClick(button, mouseState);
 	}
 	else
 	{
 		mouseState.timeReleased = GetTime();
 		mouseState.positionReleased = mousePos;
-		if(m_Tools.OnMouseRelease(button, mouseState))
-		{
-			Redraw();
-		}
+		m_Tools.OnMouseRelease(button, mouseState);
 	}
 
 	auto eventIt = m_OnMouseEvents.find(button);
@@ -282,10 +496,7 @@ void Application::OnMouseButton(MouseButton button, MousePressState state, int m
 void Application::OnMouseMotion(int mouseX, int mouseY)
 {
 	m_MousePos = Vec2Int(mouseX, mouseY);
-	if(m_Tools.OnMouseMove(m_MousePos))
-	{
-		Redraw();
-	}
+	m_Tools.OnMouseMove(m_MousePos);
 }
 
 void Application::OnMouseWheel(int wheel, int direction, int mouseX, int mouseY)
@@ -295,12 +506,10 @@ void Application::OnMouseWheel(int wheel, int direction, int mouseX, int mouseY)
 	float initialSize = m_Camera.GetSize();
 	float size = initialSize * multiplier;
 	m_Camera.SetSize(size);
-	Redraw();
 }
 
 double Application::GetTime() const {
-	auto glutTime = glutGet(GLUT_ELAPSED_TIME);
-	return ((double)glutTime) / 1000.0;
+	return glfwGetTime();
 }
 
 bool Application::GetKeyDown(char key) const
@@ -332,10 +541,6 @@ MouseState Application::GetMouseState(MouseButton key) const
 }
 
 void Application::Render() {
-	auto clearColor = Parameters::GetClearColor();
-	glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	OverwriteTextures();
 
 	const Mat4& viewProj = m_Camera.GetViewProjMatrix();
@@ -371,15 +576,7 @@ void Application::Render() {
 
 void Application::Update()
 {
-	if(m_Tools.OnUpdate(m_UpdateDeltaTime) || !m_Lines.empty())
-	{
-		Redraw();
-	}
-}
-
-void Application::Redraw()
-{
-	glutPostRedisplay();
+	m_Tools.OnUpdate(m_UpdateDeltaTime);
 }
 
 Vec2Int Application::GetMousePos() const {
@@ -555,4 +752,9 @@ void Application::DrawWorldLine(Vec2 from, Vec2 to, float duration, Color color)
 
 	auto tuple = m_Lines.emplace_back(Poly({from, to}), GetTime() + duration);
 	std::get<Poly>(tuple).m_Color = color;
+}
+
+void Application::glfw_error_callback(int error, const char *description)
+{
+	REI_ERROR("GLFW Error {0}: {1}", error, description);
 }

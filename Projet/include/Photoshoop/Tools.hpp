@@ -14,7 +14,7 @@ class Application;
 
 enum class Tools
 {
-	NONE,
+	NONE = 0,
 	MOVE,
 	DRAW_POLYGONE,
 	DRAW_WINDOW,
