@@ -319,6 +319,24 @@ void Application::Menu()
 			ImGui::EndCombo();
 		}
 
+		if(ImGui::CollapsingHeader("Camera")) {
+			if (ImGui::Button("Reset Position")) {
+				m_Camera.SetPosition({0, 0});
+			}
+
+			Vec2 pos = m_Camera.GetPosition();
+			if(ImGui::DragFloat2("Camera Position", &pos.x, 1))
+			{
+				m_Camera.SetPosition(pos);
+			}
+
+			float size = m_Camera.GetSize();
+			if(ImGui::DragFloat("Camera Size", &size, 1, 1, FLT_MAX))
+			{
+				m_Camera.SetSize(size);
+			}
+		}
+
 		ImGui::End();
 	}
 	/*

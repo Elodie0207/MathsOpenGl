@@ -95,8 +95,8 @@ private:
 	/// === MOVEMENT ===
 
 	bool mouseMoving = false;
-	Vec2Int mousePosPressed;
-	Vec2 camPosePressed;
+	Vec2Int mousePosPressed = {0,0};
+	Vec2 camPosePressed = {0,0};
 
 	/// === DRAW POLY ===
 	void ClearDrawnPoly();

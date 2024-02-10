@@ -207,7 +207,7 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 	{
 		case Tools::MOVE:
 		{
-			if(mouse== MouseButton::Left)
+			if(mouse== MouseButton::Left && mouseMoving)
 			{
 				mouseMoving = false;
 				auto mousePosReleased = state.positionReleased;
