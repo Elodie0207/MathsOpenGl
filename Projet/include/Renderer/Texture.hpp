@@ -70,11 +70,11 @@ struct Texture2DSpecification
 	std::variant<std::filesystem::path, const void*> image;
 	int width = 0, height = 0, channels = 0;
 
-	TextureFilter filterMag = TextureFilter::Linear;
-	TextureFilter filterMin = TextureFilter::Linear;
+	TextureFilter filterMag = TextureFilter::Nearest;
+	TextureFilter filterMin = TextureFilter::Nearest;
 
-	TextureWrapper wrapperS = TextureWrapper::Repeat;
-	TextureWrapper wrapperT = TextureWrapper::Repeat;
+	TextureWrapper wrapperS = TextureWrapper::ClampToEdge;
+	TextureWrapper wrapperT = TextureWrapper::ClampToEdge;
 
 	PixelFormat pixelFormat = PixelFormat::RGBA;
 	PixelType pixelType = PixelType::PX_8;

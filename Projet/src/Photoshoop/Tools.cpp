@@ -109,7 +109,7 @@ void ToolsHandler::Draw(const Mat4 &viewProjMatrix) {
 	windowedPoly.Draw(viewProjMatrix);
 }
 
-static Vec2Int MousePosePressDraw;
+static Vec2 MousePosePressDraw;
 
 bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 {
@@ -151,11 +151,25 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			}
 		}
 		break;
-		case Tools::FILLING:
+		case Tools::SWEEP_FILLING:
 		{
 			if(mouse == MouseButton::Left) {
 				MousePosePressDraw = state.positionPressed;
 				Math::polygon_fill(polyDrawn.GetPoints(), *m_App, Parameters::GetColor());
+
+				// TODO: get from the window the min and max (i.e. bounding box)
+				// TODO: launch using the 'MousePosePressDraw' (x/y) and min max with the 'Math::fillRegionConnexity4'.
+			}
+		}
+		break;
+		case Tools::AREA_FILLING:
+		{
+			if(mouse == MouseButton::Left) {
+				MousePosePressDraw = m_App->ScreenToWorldPos(state.positionPressed);
+				auto halfSize = m_FillSize * 0.5f;
+				auto min = MousePosePressDraw - halfSize;
+				auto max = MousePosePressDraw + halfSize;
+				Math::fillRegionConnexity4(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
 
 				// TODO: get from the window the min and max (i.e. bounding box)
 				// TODO: launch using the 'MousePosePressDraw' (x/y) and min max with the 'Math::fillRegionConnexity4'.
@@ -197,6 +211,15 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
             }
         }
             break;
+		case Tools::DRAWING:
+		{
+			if(mouse == MouseButton::Left)
+			{
+				m_IsDrawing = true;
+				m_LastDrawingPos = m_App->ScreenToWorldPos(state.positionPressed);
+			}
+		}
+			break;
     }
     return false;
 }
@@ -222,27 +245,14 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 			}
 		}
 		break;
-//		case Tools::FILLING:
-//		{
-//			if (mouse == MouseButton::Left) {
-//				Vec2Int pressed = m_App->ScreenToWorldPos(state.positionPressed);
-//				Vec2Int released = m_App->ScreenToWorldPos(state.positionReleased);
-//				auto begin = Math::Min(pressed, released);
-//				auto end = Math::Max(pressed, released);
-//				auto color = Vec4(.8, .1, .2, 1);
-//
-//				for (int x = begin.x; x <= end.x; x++)
-//				{
-//					for (int y = begin.y; y <= end.y; y++)
-//					{
-//						m_App->WriteWorldPixel({ x,y }, color);
-//					}
-//				}
-//				return true;
-//
-//			}
-//		}
-//		break;
+		case Tools::DRAWING:
+		{
+			if(mouse== MouseButton::Left)
+			{
+				m_IsDrawing = false;
+			}
+		}
+			break;
 	}
 	return false;
 }
@@ -278,6 +288,39 @@ bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 			return true;
 		}
 			break;
+		case Tools::DRAWING:
+		{
+			if(m_IsDrawing) {
+				// Bresenham's line algorithm
+				Vec2Int target = m_App->ScreenToWorldPos(mousePos);
+				int dx = std::abs(target.x - m_LastDrawingPos.x);
+				int dy = std::abs(target.y - m_LastDrawingPos.y);
+
+				int sx = (m_LastDrawingPos.x < target.x) ? 1 : -1;
+				int sy = (m_LastDrawingPos.y < target.y) ? 1 : -1;
+
+				int err = dx - dy;
+
+				do
+				{
+					DrawWorldPos({m_LastDrawingPos.x, m_LastDrawingPos.y}, m_DrawingSize);
+
+					int e2 = 2 * err;
+					if (e2 > -dy)
+					{
+						err -= dy;
+						m_LastDrawingPos.x += sx;
+					}
+					if (e2 < dx)
+					{
+						err += dx;
+						m_LastDrawingPos.y += sy;
+					}
+				}
+				while(m_LastDrawingPos.x != target.x && m_LastDrawingPos.y != target.y);
+			}
+		}
+		break;
 	}
 	return false;
 }
@@ -381,20 +424,26 @@ void ToolsHandler::OnImGui()
 		ImGui::ColorEdit4("Poly Drawn", &polyDrawn.m_Color.x);
 		ImGui::ColorEdit4("Window Drawn", &windowDrawn.m_Color.x);
 		ImGui::ColorEdit4("Windowed Poly", &windowedPoly.m_Color.x);
+
+		ImGui::Spacing();
+
+		ImGui::ColorEdit4("Drawing Color", &m_BorderColor.x);
+		ImGui::DragInt("Drawing Size", &m_DrawingSize, 1, 1, INT_MAX);
 	}
 	ImGui::End();
 }
 
-//void ToolsHandler::CHANGE_COLOR(Tools colorTool) {
-//    if (colorTool == Tools::RED) {
-//        color = 1;
-//    } else if (colorTool == Tools::YELLOW) {
-//        color = 2;
-//    } else if (colorTool == Tools::BLUE) {
-//        color = 3;
-//    }
-//}
+void ToolsHandler::DrawWorldPos(Vec2 pos, int size)
+{
+	auto min = pos - (float)(size / 2);
+	auto max = pos + (float)(size / 2);
 
+	for (int x = min.x; x <= max.x; ++x) {
+		for (int y = min.y; y <= max.y; ++y) {
+			m_App->WriteWorldPixel({x,y}, m_BorderColor);
+		}
+	}
+}
 
 
 
