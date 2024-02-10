@@ -11,6 +11,7 @@
 #include "UUID.hpp"
 #include "Input.hpp"
 #include "SmartPtr.hpp"
+#include "KeyCodes.hpp"
 
 #include <glad/glad.h>
 

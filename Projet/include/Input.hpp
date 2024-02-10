@@ -17,7 +17,7 @@ enum class MouseButton
 	Right = GLFW_MOUSE_BUTTON_RIGHT,
 };
 
-enum class MousePressState
+enum class PressState
 {
 	Up = GLFW_RELEASE,
 	Down = GLFW_PRESS,

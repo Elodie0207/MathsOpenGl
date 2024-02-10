@@ -54,22 +54,22 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 		Vec2 movement(0.0f);
 		float frameMovement = m_CameraSpeed * deltaTime * m_App->GetCamera().GetSize();
 
-		if (m_App->GetKeyDown('z')) // up
+		if (m_App->GetKeyDown(Key::Z)) // up
 		{
 			movement += Vec2(0, +frameMovement);
 		}
 
-		if (m_App->GetKeyDown('s')) // down
+		if (m_App->GetKeyDown(Key::S)) // down
 		{
 			movement += Vec2(0, -frameMovement);
 		}
 
-		if (m_App->GetKeyDown('d')) // right
+		if (m_App->GetKeyDown(Key::D)) // right
 		{
 			movement += Vec2(+frameMovement, 0);
 		}
 
-		if (m_App->GetKeyDown('q')) // down
+		if (m_App->GetKeyDown(Key::Q)) // down
 		{
 			movement += Vec2(-frameMovement, 0);
 		}
@@ -79,12 +79,12 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 			return true;
 		}
 	}
-	else if(m_Tool == Tools::DRAW_POLYGONE && drawingPoly && m_App->GetKeyDown(27))
+	else if(m_Tool == Tools::DRAW_POLYGONE && drawingPoly && m_App->GetKeyDown(Key::Escape))
 	{
 		StopDrawingPoly();
 		return true;
 	}
-	else if(m_Tool == Tools::DRAW_WINDOW && drawingWindow && m_App->GetKeyDown(27))
+	else if(m_Tool == Tools::DRAW_WINDOW && drawingWindow && m_App->GetKeyDown(Key::Escape))
 	{
 		StopDrawingWindow();
 		return true;
@@ -110,6 +110,7 @@ void ToolsHandler::Draw(const Mat4 &viewProjMatrix) {
 }
 
 static Vec2Int MousePosePressDraw;
+
 bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 {
 	switch (m_Tool)
@@ -220,6 +221,7 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 				}
 			}
 		}
+		break;
 //		case Tools::FILLING:
 //		{
 //			if (mouse == MouseButton::Left) {
@@ -240,6 +242,7 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 //
 //			}
 //		}
+//		break;
 	}
 	return false;
 }
@@ -260,12 +263,14 @@ bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 				}
 			}
 		}
+		break;
 		case Tools::DRAW_POLYGONE:
 		{
 			if(!drawingPoly) break;
 			polyDrawn.m_Points[polyDrawn.GetPointCount() - 1] = m_App->GetWorldMousePos();
 			return true;
 		}
+			break;
 		case Tools::DRAW_WINDOW:
 		{
 			if(!drawingWindow) break;

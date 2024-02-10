@@ -67,8 +67,8 @@ public:
 	 * @return
 	 */
 	[[nodiscard]] double GetTime() const;
-	[[nodiscard]] bool GetKeyDown(char key) const;
-	[[nodiscard]] KeyState GetKeyState(char key) const;
+	[[nodiscard]] bool GetKeyDown(Key key) const;
+	[[nodiscard]] KeyState GetKeyState(Key key) const;
 	[[nodiscard]] bool GetMouseDown(MouseButton key) const;
 	[[nodiscard]] MouseState GetMouseState(MouseButton key) const;
 
@@ -111,9 +111,9 @@ private:
 	void Menu(int value);
 	 */
 	void OnResize(int width, int height);
-	void OnKeyDown(char key, int mouseX, int mouseY);
-	void OnKeyUp(char key, int mouseX, int mouseY);
-	void OnMouseButton(MouseButton button, MousePressState state, int mouseX, int mouseY);
+	void OnKeyDown(Key key, int mouseX, int mouseY);
+	void OnKeyUp(Key key, int mouseX, int mouseY);
+	void OnMouseButton(MouseButton button, PressState state, int mouseX, int mouseY);
 	void OnMouseMotion(int mouseX, int mouseY);
 	void OnMouseWheel(int wheel, int direction, int mouseX, int mouseY);
 
@@ -142,12 +142,12 @@ private:
 	double m_RenderTime = 0; float m_RenderDeltaTime = 0.0166f; // about a frame at 60fps
 	double m_UpdateTime = 0; float m_UpdateDeltaTime = 0.0166f; // about a frame at 60fps
 
-	std::unordered_map<char, KeyState> m_PressedKey;
+	std::unordered_map<Key, KeyState> m_PressedKey;
 	std::unordered_map<MouseButton, MouseState> m_PressedMouseButtons;
 	Vec2Int m_MousePos;
 
-	std::vector<std::function<void(char, int, int)>> m_OnKeyPressEvents;
-	std::vector<std::function<void(char, int, int)>> m_OnKeyReleaseEvents;
+	std::vector<std::function<void(Key, int, int)>> m_OnKeyPressEvents;
+	std::vector<std::function<void(Key, int, int)>> m_OnKeyReleaseEvents;
 	std::unordered_map<MouseButton, std::vector<std::function<void(const MouseState&)>>> m_OnMouseEvents;
 
 	ToolsHandler m_Tools;

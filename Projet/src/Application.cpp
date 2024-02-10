@@ -19,70 +19,9 @@
 #include <imgui_impl_glfw.h>
 #include <GLFW/glfw3.h>
 
-#define CallNextUpdate(appPtr) glutTimerFuncUcall(1000 / 60, &Application::StaticUpdate, 0, appPtr);
 
 ApplicationSpecification::ApplicationSpecification(int argc, char **argv) : argc(argc), argv(argv) {}
-/*
-void Application::StaticRender(void* appPtr)
-{
-	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-//	REI_INFO("New Rendering");
-	Application* app = static_cast<Application *>(appPtr);
-	app->UpdateDeltaTime(app->m_RenderTime, app->m_RenderDeltaTime);
-	app->Render();
-}
 
-void Application::StaticUpdate(int timerId, void* appPtr)
-{
-	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-	Application* app = static_cast<Application *>(appPtr);
-	app->UpdateDeltaTime(app->m_UpdateTime, app->m_UpdateDeltaTime);
-	app->Update();
-	CallNextUpdate(appPtr);
-}
-
-void Application::StaticMenu(int value, void* appPtr)
-{
-	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-	static_cast<Application*>(appPtr)->Menu(value);
-}
-
-void Application::StaticOnResize(int width, int height, void *appPtr)
-{
-	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-	static_cast<Application*>(appPtr)->OnResize(width, height);
-}
-
-void Application::StaticOnKeyDown(unsigned char key, int mouseX, int mouseY, void* appPtr)
-{
-	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-	static_cast<Application*>(appPtr)->OnKeyDown((char)key, mouseY, mouseY);
-}
-
-void Application::StaticOnKeyUp(unsigned char key, int mouseX, int mouseY, void* appPtr)
-{
-	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-	static_cast<Application*>(appPtr)->OnKeyUp((char)key, mouseY, mouseY);
-}
-
-void Application::StaticOnMouseButton(int button, int state, int mouseX, int mouseY, void *appPtr)
-{
-	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-	static_cast<Application *>(appPtr)->OnMouseButton(static_cast<MouseButton>(button),
-													  static_cast<MousePressState>(state), mouseX, mouseY);
-}
-
-void Application::StaticOnMouseMotion(int mouseX, int mouseY, void* appPtr)
-{
-	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-	static_cast<Application *>(appPtr)->OnMouseMotion(mouseX, mouseY);
-}
-void Application::StaticOnMouseWheel(int wheel, int direction, int mouseX, int mouseY, void* appPtr)
-{
-	REI_ASSERT(static_cast<Application*>(appPtr) != nullptr, "The pointer {0} is not a valid Application Pointer.", appPtr);
-	static_cast<Application *>(appPtr)->OnMouseWheel(wheel, direction, mouseX, mouseY);
-}
-*/
 Application::Application(ApplicationSpecification appSpec) :
 		m_AppSpec(std::move(appSpec)),
 		m_Camera(m_AppSpec.width, m_AppSpec.height),
@@ -100,9 +39,6 @@ Application::Application(ApplicationSpecification appSpec) :
 		return;
 	}
 
-	// Decide GL+GLSL versions
-	// GL 3.0 + GLSL 130
-	const char* glsl_version = "#version 460";
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
@@ -142,6 +78,84 @@ void Application::Initialize() {
 	glLineWidth(5.0f);
 	glPointSize(5.0f);
 
+	glfwSetWindowUserPointer(m_Window, this);
+
+	glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
+	{
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		REI_INFO("Resize to : ({0}, {1})", width, height);
+		data.OnResize(width, height);
+	});
+
+	glfwSetWindowIconifyCallback(m_Window, [](GLFWwindow* window, int iconify)
+	{
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		data.m_AppSpec.minified = iconify == GLFW_TRUE;
+		if(data.m_AppSpec.minified)
+		{
+			REI_INFO("Application is minified");}
+		else
+		{
+			REI_INFO("Application is not minified");
+		}
+	});
+
+	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int intkey, int scancode, int action, int mods)
+	{
+		const auto& io = ImGui::GetIO(); auto imguiUseInputs = io.WantCaptureMouse || io.WantCaptureKeyboard;
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		const auto& mousePos = data.m_MousePos;
+
+		Key key = (Key)intkey;
+
+		switch ((GLFWKeyState)action) {
+			case GLFWKeyState::PRESS:
+			{
+				if(!imguiUseInputs) {
+					REI_INFO("Pressing key {0}", GetKeyName(key));
+					data.OnKeyDown(key, mousePos.x, mousePos.y);
+				}
+				break;
+			}
+			case GLFWKeyState::RELEASE:
+			{
+				REI_INFO("Release key {0}", GetKeyName(key));
+				data.OnKeyUp(key, mousePos.x, mousePos.y);
+				break;
+			}
+		}
+	});
+
+	glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods){
+
+		auto mouseButton = (MouseButton)button;
+		auto mousePressState = (PressState)action;
+
+		const auto& io = ImGui::GetIO(); auto imguiUseInputs = io.WantCaptureMouse || io.WantCaptureKeyboard;
+		if(imguiUseInputs)
+		{
+			return;
+		}
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		const auto& mousePos = data.m_MousePos;
+		REI_INFO("Mouse Button : {0}; MouseState: {1}", button, action);
+		data.OnMouseButton(mouseButton, mousePressState, mousePos.x, mousePos.y);
+	});
+
+	glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset){
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		const auto& mousePos = data.m_MousePos;
+		REI_INFO("Scroll : ({0}, {1})", xoffset, yoffset);
+		data.OnMouseWheel(0, yoffset, mousePos.x, mousePos.y);
+	});
+
+	glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos){
+		Application& data = *((Application*)glfwGetWindowUserPointer(window));
+		REI_INFO("Mouse Move to : ({0}, {1})", xpos, ypos);
+		data.OnMouseMotion(xpos, ypos);
+	});
+
+
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -168,62 +182,13 @@ void Application::Initialize() {
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
 	ImGui_ImplOpenGL3_Init("#version 460");
-	m_Tools.Initialize();
-	glfwSetWindowUserPointer(m_Window, this);
-
-	glfwSetFramebufferSizeCallback(m_Window, [](GLFWwindow* window, int width, int height)
-	{
-		Application& data = *((Application*)glfwGetWindowUserPointer(window));
-		data.OnResize(width, height);
-	});
-
-	glfwSetWindowIconifyCallback(m_Window, [](GLFWwindow* window, int iconify)
-	{
-		Application& data = *((Application*)glfwGetWindowUserPointer(window));
-		data.m_AppSpec.minified = iconify == GLFW_TRUE;
-	});
-
-	glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
-	{
-		Application& data = *((Application*)glfwGetWindowUserPointer(window));
-		const auto& mousePos = data.m_MousePos;
-
-		switch ((GLFWKeyState)action) {
-			case GLFWKeyState::PRESS:
-			{
-				data.OnKeyDown(key, mousePos.x, mousePos.y);
-				break;
-			}
-			case GLFWKeyState::RELEASE:
-			{
-				data.OnKeyUp(key, mousePos.x, mousePos.y);
-				break;
-			}
-		}
-	});
-
-	glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods){
-		Application& data = *((Application*)glfwGetWindowUserPointer(window));
-		const auto& mousePos = data.m_MousePos;
-		data.OnMouseButton((MouseButton)button, (MousePressState)action, mousePos.x, mousePos.y);
-	});
-
-	glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset){
-		Application& data = *((Application*)glfwGetWindowUserPointer(window));
-		const auto& mousePos = data.m_MousePos;
-		data.OnMouseWheel(0, yoffset, mousePos.x, mousePos.y);
-	});
-
-	glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos){
-		Application& data = *((Application*)glfwGetWindowUserPointer(window));
-		data.OnMouseMotion(xpos, ypos);
-	});
 
 	// Old
 	/*
 	CreateMenu();
 	 */
 
+	m_Tools.Initialize();
 	CreateTextures();
 }
 
@@ -249,6 +214,10 @@ void Application::Run() {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
+		if (show_demo_window)
+			ImGui::ShowDemoWindow(&show_demo_window);
+
 
 		Menu();
 
@@ -264,7 +233,6 @@ void Application::Run() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		Render();
-
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		// Update and Render additional Platform Windows
@@ -326,7 +294,7 @@ void Application::Menu()
 			}
 		}
 
-		static std::vector<std::string> tools = { "NONE",
+		const std::vector<std::string> tools = { "NONE",
 												  "MOVE",
 												  "DRAW_POLYGONE",
 												  "DRAW_WINDOW",
@@ -335,11 +303,11 @@ void Application::Menu()
 
 		auto tool = m_Tools.GetSelectedTool();
 		auto toolIndex = (int)tool;
-		std::string currentTargetImage = tools[toolIndex];
+		const std::string& currentTargetImage = tools[toolIndex];
 		if (ImGui::BeginCombo("Tool", currentTargetImage.c_str())) {
 			for (int i = 0; i < tools.size(); i++) {
 				const bool is_selected = (toolIndex == i);
-				std::string iImage = tools[toolIndex];
+				const std::string& iImage = tools[i];
 				if (ImGui::Selectable(iImage.c_str(), is_selected)) {
 					toolIndex = i;
 					m_Tools.SetTool((Tools)i);
@@ -416,12 +384,17 @@ void Application::OnResize(int width, int height)
 //	Redraw();
 }
 
-void Application::OnKeyDown(char key, int mouseX, int mouseY)
+void Application::OnKeyDown(Key key, int mouseX, int mouseY)
 {
+	if(key == Key::R)
+	{
+		m_Camera.SetPosition({0,0});
+	}
+
 	auto it = m_PressedKey.find(key);
 	if(it == m_PressedKey.end())
 	{
-		REI_INFO("On First Key Down {0}", key);
+		REI_INFO("On First Key Down {0}", GetKeyName(key));
 		m_PressedKey.insert({key, {true, GetTime(), 0.0}});
 		for(auto& onKeyPress : m_OnKeyPressEvents)
 		{
@@ -430,7 +403,7 @@ void Application::OnKeyDown(char key, int mouseX, int mouseY)
 	}
 	else if (!it->second.pressed)
 	{
-		REI_INFO("On Key Down {0}", key);
+		REI_INFO("On Key Down {0}", GetKeyName(key));
 		it->second.pressed = true;
 		it->second.timePressed = GetTime();
 		for(auto& onKeyPress : m_OnKeyPressEvents)
@@ -444,9 +417,9 @@ void Application::OnKeyDown(char key, int mouseX, int mouseY)
 	}
 }
 
-void Application::OnKeyUp(char key, int mouseX, int mouseY)
+void Application::OnKeyUp(Key key, int mouseX, int mouseY)
 {
-	REI_INFO("OnKeyUp {0}", key);
+	REI_INFO("OnKeyUp {0}", GetKeyName(key));
 	auto it = m_PressedKey.find(key);
 	if(it == m_PressedKey.end())
 	{
@@ -464,12 +437,12 @@ void Application::OnKeyUp(char key, int mouseX, int mouseY)
 	}
 }
 
-void Application::OnMouseButton(MouseButton button, MousePressState state, int mouseX, int mouseY)
+void Application::OnMouseButton(MouseButton button, PressState state, int mouseX, int mouseY)
 {
 	auto mousePos = Vec2Int(mouseX, mouseY);
 
 	auto& mouseState = m_PressedMouseButtons[button];
-	mouseState.pressed = state == MousePressState::Down;
+	mouseState.pressed = state == PressState::Down;
 	if(mouseState.pressed)
 	{
 		mouseState.timePressed = GetTime();
@@ -512,14 +485,14 @@ double Application::GetTime() const {
 	return glfwGetTime();
 }
 
-bool Application::GetKeyDown(char key) const
+bool Application::GetKeyDown(Key key) const
 {
 	auto it = m_PressedKey.find(key);
 	if(it == m_PressedKey.end()) return false;
 	return it->second.pressed;
 }
 
-KeyState Application::GetKeyState(char key) const
+KeyState Application::GetKeyState(Key key) const
 {
 	auto it = m_PressedKey.find(key);
 	if(it == m_PressedKey.end()) return { false, 0.0 };
