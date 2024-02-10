@@ -217,6 +217,7 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			{
 				m_IsDrawing = true;
 				m_LastDrawingPos = m_App->ScreenToWorldPos(state.positionPressed);
+				DrawWorldPos(m_LastDrawingPos, m_DrawingSize);
 			}
 		}
 			break;
@@ -433,14 +434,19 @@ void ToolsHandler::OnImGui()
 	ImGui::End();
 }
 
-void ToolsHandler::DrawWorldPos(Vec2 pos, int size)
+void ToolsHandler::DrawWorldPos(Vec2Int pos, int size)
 {
-	auto min = pos - (float)(size / 2);
-	auto max = pos + (float)(size / 2);
+	float hSize = size / 2.0f;
+	Vec2Int min = pos - (int)hSize;
+	Vec2Int max = pos + (int)hSize;
 
 	for (int x = min.x; x <= max.x; ++x) {
 		for (int y = min.y; y <= max.y; ++y) {
-			m_App->WriteWorldPixel({x,y}, m_BorderColor);
+			Vec2Int currentPx = {x,y};
+			auto dst = Math::Distance(Vec2(pos), Vec2(currentPx));
+			if(dst < std::max(hSize, 1.0f)) {
+				m_App->WriteWorldPixel(currentPx, m_BorderColor);
+			}
 		}
 	}
 }

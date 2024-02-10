@@ -142,7 +142,7 @@ private:
 	bool m_IsDrawing = false;
 	Vec2Int m_LastDrawingPos;
 
-	void DrawWorldPos(Vec2 pos, int size);
+	void DrawWorldPos(Vec2Int pos, int size);
 
 private:
 	Tools m_Tool = Tools::MOVE;
