@@ -12,7 +12,10 @@
 #ifndef GLFW_INCLUDE_NONE
 #define GLFW_INCLUDE_NONE 1
 #endif
+
+#ifndef IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 #define IMGUI_IMPL_OPENGL_LOADER_CUSTOM 1
+#endif
 
 #include <imgui.h>
 #include <imgui_impl_opengl3.h>
@@ -143,6 +146,9 @@ void Application::Initialize() {
 	});
 
 	glfwSetScrollCallback(m_Window, [](GLFWwindow* window, double xoffset, double yoffset){
+		const auto& io = ImGui::GetIO(); auto imguiUseInputs = io.WantCaptureMouse || io.WantCaptureKeyboard;
+		if(imguiUseInputs) return;
+
 		Application& data = *((Application*)glfwGetWindowUserPointer(window));
 		const auto& mousePos = data.m_MousePos;
 		REI_INFO("Scroll : ({0}, {1})", xoffset, yoffset);
@@ -182,11 +188,6 @@ void Application::Initialize() {
 	// Setup Platform/Renderer backends
 	ImGui_ImplGlfw_InitForOpenGL(m_Window, true);
 	ImGui_ImplOpenGL3_Init("#version 460");
-
-	// Old
-	/*
-	CreateMenu();
-	 */
 
 	m_Tools.Initialize();
 	CreateTextures();
@@ -275,25 +276,6 @@ void Application::Menu()
 {
 	ImGui::Begin("Tools");
 	{
-		if(ImGui::CollapsingHeader("Colors"))
-		{
-			if(ImGui::Button("Red"))
-			{
-				m_Tools.CHANGE_COLOR(Tools::RED);
-				m_Tools.SetTool(Tools::NONE);
-			}
-			if(ImGui::Button("Yellow"))
-			{
-				m_Tools.CHANGE_COLOR(Tools::YELLOW);
-				m_Tools.SetTool(Tools::NONE);
-			}
-			if(ImGui::Button("Blue"))
-			{
-				m_Tools.CHANGE_COLOR(Tools::BLUE);
-				m_Tools.SetTool(Tools::NONE);
-			}
-		}
-
 		const std::vector<std::string> tools = { "NONE",
 												  "MOVE",
 												  "DRAW_POLYGONE",
@@ -339,52 +321,8 @@ void Application::Menu()
 
 		ImGui::End();
 	}
-	/*
 
-
-//    glutAddMenuEntry("Red", (int)(Tools::RED));
-//    glutAddMenuEntry("Yellow",(int)Tools::YELLOW);
-//    glutAddMenuEntry("Blue",(int) Tools::BLUE);
-//
-//	glutCreateMenuUcall(Application::StaticMenu, this);
-//	glutAddMenuEntry("move", (int)Tools::MOVE);
-//    glutAddSubMenu("couleurs",returnsubmenucolor4); //;
-//	glutAddMenuEntry("trace polygone", (int)Tools::DRAW_POLYGONE);
-//	glutAddMenuEntry("trace fenetre", (int)Tools::DRAW_WINDOW);
-//	glutAddMenuEntry("fenetrage", (int)Tools::WINDOWING);
-//	glutAddMenuEntry("remplissage", (int)Tools::FILLING);
-//	glutAddMenuEntry("Exit", -1);
-
-	if(value == -1) {
-		REI_INFO("Press 'Tools::EXIT'.");
-		Exit();
-		return;
-	}
-
-	auto tool = (Tools)value;
-
-	switch (tool) {
-		case Tools::RED:
-
-            m_Tools.CHANGE_COLOR(Tools::RED);
-			m_Tools.SetTool(Tools::NONE);
-			break;
-        case Tools::BLUE:
-            m_Tools.CHANGE_COLOR(Tools::BLUE);
-            m_Tools.SetTool(Tools::NONE);
-            break;
-        case Tools::YELLOW:
-            m_Tools.CHANGE_COLOR(Tools::YELLOW);
-            m_Tools.SetTool(Tools::NONE);
-            break;
-		default:
-			m_Tools.SetTool(tool);
-			break;
-	}
-
-	Redraw();
-	 */
-
+	m_Tools.OnImGui();
 }
 
 void Application::Exit()

@@ -95,15 +95,15 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 void ToolsHandler::Draw(const Mat4 &viewProjMatrix) {
 //	drawObj.Draw(viewProjMatrix);
 //	quad.Draw(viewProjMatrix);
-    if(color==1) {
-        polyDrawn.m_Color = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    }
-    else if(color==2) {
-        polyDrawn.m_Color = Vec4(1.0f, 1.0f, 0.0f, 1.0f);
-    }
-    else if(color==3){
-        polyDrawn.m_Color= Vec4(0.0f, 0.0f, 1.0f, 1.0f);
-    }
+//    if(color==1) {
+//        polyDrawn.m_Color = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+//    }
+//    else if(color==2) {
+//        polyDrawn.m_Color = Vec4(1.0f, 1.0f, 0.0f, 1.0f);
+//    }
+//    else if(color==3){
+//        polyDrawn.m_Color= Vec4(0.0f, 0.0f, 1.0f, 1.0f);
+//    }
 	polyDrawn.Draw(viewProjMatrix);
 	windowDrawn.Draw(viewProjMatrix);
 	windowedPoly.Draw(viewProjMatrix);
@@ -374,15 +374,26 @@ void ToolsHandler::AddPointToWindow(Vec2Int screenPos)
 	}
 }
 
-void ToolsHandler::CHANGE_COLOR(Tools colorTool) {
-    if (colorTool == Tools::RED) {
-        color = 1;
-    } else if (colorTool == Tools::YELLOW) {
-        color = 2;
-    } else if (colorTool == Tools::BLUE) {
-        color = 3;
-    }
+void ToolsHandler::OnImGui()
+{
+	ImGui::Begin("Tools Handler");
+	{
+		ImGui::ColorEdit4("Poly Drawn", &polyDrawn.m_Color.x);
+		ImGui::ColorEdit4("Window Drawn", &windowDrawn.m_Color.x);
+		ImGui::ColorEdit4("Windowed Poly", &windowedPoly.m_Color.x);
+	}
+	ImGui::End();
 }
+
+//void ToolsHandler::CHANGE_COLOR(Tools colorTool) {
+//    if (colorTool == Tools::RED) {
+//        color = 1;
+//    } else if (colorTool == Tools::YELLOW) {
+//        color = 2;
+//    } else if (colorTool == Tools::BLUE) {
+//        color = 3;
+//    }
+//}
 
 
 
