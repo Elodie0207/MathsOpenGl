@@ -101,3 +101,7 @@ std::vector<Point> Poly::GetPoints() const
 Poly::~Poly() {
 
 }
+
+AABB2D Poly::GetBoundBox() const {
+	return AABB2D::ComputeBoundingBox(m_Points);
+}

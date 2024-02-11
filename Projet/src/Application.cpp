@@ -276,34 +276,6 @@ void Application::Menu()
 {
 	ImGui::Begin("Tools");
 	{
-		const std::vector<std::string> tools = { "NONE",
-												  "MOVE",
-												  "DRAW_POLYGONE",
-												  "DRAW_WINDOW",
-												  "WINDOWING",
-												  "SWEEP_FILLING",
-												  "AREA_FILLING",
-												  "DRAWING",
-		};
-
-		auto tool = m_Tools.GetSelectedTool();
-		auto toolIndex = (int)tool;
-		const std::string& currentTargetImage = tools[toolIndex];
-		if (ImGui::BeginCombo("Tool", currentTargetImage.c_str())) {
-			for (int i = 0; i < tools.size(); i++) {
-				const bool is_selected = (toolIndex == i);
-				const std::string& iImage = tools[i];
-				if (ImGui::Selectable(iImage.c_str(), is_selected)) {
-					toolIndex = i;
-					m_Tools.SetTool((Tools)i);
-				}
-
-				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-				if (is_selected) ImGui::SetItemDefaultFocus();
-			}
-			ImGui::EndCombo();
-		}
-
 		if(ImGui::CollapsingHeader("Camera")) {
 			if (ImGui::Button("Reset Position")) {
 				m_Camera.SetPosition({0, 0});

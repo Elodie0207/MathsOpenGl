@@ -12,6 +12,18 @@
 
 class Application;
 
+struct RenderObject
+{
+public:
+	RenderObject() = default;
+	~RenderObject() = default;
+	inline RenderObject(Poly polygon, bool isWindow = false) : Polygon(polygon), IsWindow(isWindow), Id() {}
+
+	Poly Polygon = Poly();
+	UUID Id = UUID();
+	bool IsWindow = false;
+};
+
 enum class Tools
 {
 	NONE = 0,
@@ -121,8 +133,6 @@ private:
 
 	/// === WINDOWING ===
 
-	Poly windowedPoly;
-
 	//TODO: Add function & variables to make the windowing here.
 
 	/// === SWEEP_FILLING ===
@@ -145,6 +155,8 @@ private:
 	void DrawWorldPos(Vec2Int pos, int size);
 
 private:
+	std::vector<RenderObject> m_Polygons;
+
 	Tools m_Tool = Tools::MOVE;
 	Application* m_App;
 
