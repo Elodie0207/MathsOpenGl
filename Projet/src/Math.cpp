@@ -359,6 +359,31 @@ void Math::polygon_fill(const std::vector<Point>& poly, Application& app, const 
 
 // Effectue le remplissage par region
 void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill) {
+	std::vector<Vec2Int> positionsToVisit = {{x,y}};
+
+	while(!positionsToVisit.empty())
+	{
+        Vec2Int position = positionsToVisit[positionsToVisit.size()-1];
+        positionsToVisit.pop_back();
+        if (position.x < min.x || position.x >= max.x || position.y < min.y || position.y >= max.y)
+        {continue;}
+
+        auto color = app.ReadWorldPixel(position);
+        glm::vec<4, bool> c1 = glm::epsilonEqual(color, colorFill, Vec4((1.f/256.f) * 0.75f));
+        glm::vec<4, bool> c2 = glm::epsilonEqual(color, colorContour, Vec4((1.f/256.f) * 0.75f));
+        
+        if (!((c1.x && c1.y && c1.z && c1.w) || (c2.x && c2.y && c2.z && c2.w)))
+        {
+            app.WriteWorldPixel(position, colorFill);
+
+            positionsToVisit.push_back(Vec2Int(position.x +0, position.y -1));
+            positionsToVisit.push_back(Vec2Int(position.x -1, position.y +0));
+            positionsToVisit.push_back(Vec2Int(position.x +0, position.y +1));
+            positionsToVisit.push_back(Vec2Int(position.x +1, position.y +0));
+        }
+	}
+
+	/*
     // Vérifier si les coordonnées sont dans les limites de l'image
     if (x < min.x || x >= max.x || y < min.y || y >= max.y) return;
 
@@ -373,4 +398,5 @@ void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Applicat
         fillRegionConnexity4(x + 0, y + 1, min, max, app, colorContour, colorFill); // Haut
         fillRegionConnexity4(x + 1, y + 0, min, max, app, colorContour, colorFill); // Droite
     }
+	*/
 }

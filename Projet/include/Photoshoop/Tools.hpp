@@ -19,7 +19,9 @@ enum class Tools
 	DRAW_POLYGONE,
 	DRAW_WINDOW,
 	WINDOWING,
-	FILLING,
+	SWEEP_FILLING,
+	AREA_FILLING,
+	DRAWING,
 };
 
 class ToolsHandler {
@@ -123,9 +125,24 @@ private:
 
 	//TODO: Add function & variables to make the windowing here.
 
-	/// === FILLING ===
+	/// === SWEEP_FILLING ===
 
 	//TODO: Add function & variables to make the filling here.
+
+	/// === AREA_FILLING ===
+
+	Color m_FillColor = {.8, .3, .2, 1.};
+	Vec2 m_FillSize = {1000, 1000};
+	Poly m_BorderPoly;
+
+	//TODO: Add function & variables to make the filling here.
+	/// === DRAWING ===
+	Color m_BorderColor = Color(0);
+	int m_DrawingSize = 1;
+	bool m_IsDrawing = false;
+	Vec2Int m_LastDrawingPos;
+
+	void DrawWorldPos(Vec2Int pos, int size);
 
 private:
 	Tools m_Tool = Tools::MOVE;
@@ -135,5 +152,6 @@ private:
 //	Quad quad;
 	float m_CameraSpeed = 0.6f;
 //    int color=0;
+
 
 };

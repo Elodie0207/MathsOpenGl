@@ -266,7 +266,7 @@ void Application::Run() {
 //	glutAddMenuEntry("trace polygone", (int)Tools::DRAW_POLYGONE);
 //	glutAddMenuEntry("trace fenetre", (int)Tools::DRAW_WINDOW);
 //	glutAddMenuEntry("fenetrage", (int)Tools::WINDOWING);
-//	glutAddMenuEntry("remplissage", (int)Tools::FILLING);
+//	glutAddMenuEntry("remplissage", (int)Tools::SWEEP_FILLING);
 //	glutAddMenuEntry("Exit", -1);
 //
 //	glutAttachMenu(GLUT_RIGHT_BUTTON);
@@ -281,7 +281,10 @@ void Application::Menu()
 												  "DRAW_POLYGONE",
 												  "DRAW_WINDOW",
 												  "WINDOWING",
-												  "FILLING"};
+												  "SWEEP_FILLING",
+												  "AREA_FILLING",
+												  "DRAWING",
+		};
 
 		auto tool = m_Tools.GetSelectedTool();
 		auto toolIndex = (int)tool;
