@@ -170,6 +170,9 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 				auto min = MousePosePressDraw - halfSize;
 				auto max = MousePosePressDraw + halfSize;
 				Math::fillRegionConnexity4(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+                //pour la recusive
+                //Math::fillRegionConnexity4Recursive(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+                //pour le ligne par leigne 
                 //Math::fillRegionLineByLine(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
 
 				// TODO: get from the window the min and max (i.e. bounding box)

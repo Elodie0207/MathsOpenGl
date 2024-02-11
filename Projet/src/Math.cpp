@@ -368,11 +368,7 @@ void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Applicat
         if (position.x < min.x || position.x >= max.x || position.y < min.y || position.y >= max.y)
         {continue;}
 
-        auto color = app.ReadWorldPixel(position);
-        glm::vec<4, bool> c1 = glm::epsilonEqual(color, colorFill, Vec4(0.01f));
-        glm::vec<4, bool> c2 = glm::epsilonEqual(color, colorContour, Vec4(0.01f));
-        
-        if (!((c1.x && c1.y && c1.z && c1.w) || (c2.x && c2.y && c2.z && c2.w)))
+        if (shouldBeFilled(position.x, position.y, app, colorContour, colorFill))
         {
             app.WriteWorldPixel(position, colorFill);
 
@@ -382,15 +378,17 @@ void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Applicat
             positionsToVisit.push_back(Vec2Int(position.x +1, position.y +0));
         }
 	}
+}
 
-	/*
+void Math::fillRegionConnexity4Recursive(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill)
+{
     // Vérifier si les coordonnées sont dans les limites de l'image
     if (x < min.x || x >= max.x || y < min.y || y >= max.y) return;
 
     // Vérifier si la couleur actuelle n'est ni la couleur de contour ni celle de remplissage
-	auto color = app.ReadWorldPixel({x,y});
-    if (color != colorContour && color != colorFill) {
-		app.WriteWorldPixel({x,y}, colorFill);
+    auto color = app.ReadWorldPixel({x,y});
+    if (shouldBeFilled(x, y, app, colorContour, colorFill)) {
+        app.WriteWorldPixel({x,y}, colorFill);
 
         // Appels récursifs pour remplir les régions adjacentes
         fillRegionConnexity4(x + 0, y - 1, min, max, app, colorContour, colorFill); // Bas
@@ -398,7 +396,6 @@ void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Applicat
         fillRegionConnexity4(x + 0, y + 1, min, max, app, colorContour, colorFill); // Haut
         fillRegionConnexity4(x + 1, y + 0, min, max, app, colorContour, colorFill); // Droite
     }
-	*/
 }
 
 //remplissage ligne par ligne

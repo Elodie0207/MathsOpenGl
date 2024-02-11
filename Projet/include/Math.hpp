@@ -101,6 +101,7 @@ public:
 
 	static void polygon_fill(const std::vector<Point>& poly, Application& app, const Color& color_fill);
 	static void fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill);
+    static void fillRegionConnexity4Recursive(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill);
     static bool visible(Point S, Point Fi, Point Fi1, Point centroid);
     static void fillRegionLineByLine(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill);
     static bool shouldBeFilled(int x, int y, Application& app, const Color& colorContour, const Color& colorFill);
