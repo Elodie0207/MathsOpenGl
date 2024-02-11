@@ -542,7 +542,7 @@ void Application::WriteWorldPixel(Vec2 pos, Vec4 color01, int size)
 	}
 }
 
-void Application::WriteWorldLine(Vec2 from, Vec2 to, Vec4 color01, int size)
+void Application::WriteWorldLine(Vec2Int from, Vec2Int to, Vec4 color01, int size)
 {
 	// Bresenham's line algorithm
 	int dx = std::abs(to.x - from.x);
@@ -571,10 +571,10 @@ void Application::WriteWorldLine(Vec2 from, Vec2 to, Vec4 color01, int size)
 	}
 	while(from.x != to.x || from.y != to.y);
 }
-void Application::WriteScreenLine(Vec2 fromScreenPos, Vec2 toScreenPos, Vec4 color01, int size)
+void Application::WriteScreenLine(Vec2Int fromScreenPos, Vec2Int toScreenPos, Vec4 color01, int size)
 {
-	Vec2 from = ScreenToWorldPos(fromScreenPos);
-	Vec2 to = ScreenToWorldPos(toScreenPos);
+	Vec2Int from = ScreenToWorldPos(fromScreenPos);
+	Vec2Int to = ScreenToWorldPos(toScreenPos);
 	WriteWorldLine(from, to, color01);
 }
 

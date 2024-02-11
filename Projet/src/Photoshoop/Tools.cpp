@@ -259,7 +259,9 @@ bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 		case Tools::DRAWING:
 		{
 			if(m_IsDrawing) {
-				m_App->WriteWorldLine(m_LastDrawingPos, m_App->ScreenToWorldPos(mousePos), m_BorderColor, m_DrawingSize);
+				auto target = m_App->ScreenToWorldPos(mousePos);
+				m_App->WriteWorldLine(m_LastDrawingPos, target, m_BorderColor, m_DrawingSize);
+				m_LastDrawingPos = target;
 			}
 		}
 		break;

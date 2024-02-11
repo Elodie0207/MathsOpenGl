@@ -87,8 +87,8 @@ public:
 	Vec4 ReadWorldPixel(Vec2 worldPos);
 	Vec4 ReadScreenPixel(Vec2Int screenPos);
 
-	void WriteWorldLine(Vec2 fromWorldPos, Vec2 toWorldPos, Vec4 color01, int size = 1);
-	void WriteScreenLine(Vec2 fromWorldPos, Vec2 toWorldPos, Vec4 color01, int size = 1);
+	void WriteWorldLine(Vec2Int fromWorldPos, Vec2Int toWorldPos, Vec4 color01, int size = 1);
+	void WriteScreenLine(Vec2Int fromWorldPos, Vec2Int toWorldPos, Vec4 color01, int size = 1);
 
 	[[nodiscard]] bool HasTexture(Vec2 worldPos) const;
 	[[nodiscard]] bool HasTexture(Vec2Int index) const;
