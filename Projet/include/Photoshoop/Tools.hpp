@@ -132,7 +132,7 @@ private:
 	/// === AREA_FILLING ===
 
 	Color m_FillColor = {.8, .3, .2, 1.};
-	Vec2 m_FillSize = {10, 10};
+	Vec2 m_FillSize = {1000, 1000};
 	Poly m_BorderPoly;
 
 	//TODO: Add function & variables to make the filling here.
