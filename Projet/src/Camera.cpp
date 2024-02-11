@@ -5,9 +5,10 @@
 #include "Camera.hpp"
 #include "Math.hpp"
 
-Camera::Camera(uint32_t width, uint32_t height) : m_Width(width), m_Height(height)
+Camera::Camera(uint32_t width, uint32_t height) : m_Width(width), m_Height(height), m_AspectRatio(1)
 {
 	REI_ASSERT(width > 0 && height > 0, "The Aspect Ration ({0}/{1}) is no valid.", width, height);
+	m_AspectRatio = static_cast<float>(m_Width) / static_cast<float>(m_Height);
 	UpdateViewMatrix(false);
 	UpdateProjMatrix(true);
 }

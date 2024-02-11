@@ -14,16 +14,12 @@ class Application;
 
 enum class Tools
 {
-	NONE,
+	NONE = 0,
 	MOVE,
 	DRAW_POLYGONE,
 	DRAW_WINDOW,
 	WINDOWING,
 	FILLING,
-    RED,
-    BLUE,
-    YELLOW
-
 };
 
 class ToolsHandler {
@@ -87,16 +83,23 @@ public:
 	 * @return Whether we should rerender.
 	 */
 	bool OnMouseMove(Vec2Int mousePos);
-    /**
-	 * Function called each time the user wants to change the color.
+
+//    /**
+//	 * Function called each time the user wants to change the color.
+//	 */
+//    void CHANGE_COLOR(Tools color);
+
+	/**
+	 * Called when the ImGui interface is being rendered.
+	 *
 	 */
-    void CHANGE_COLOR(Tools color);
+	void OnImGui();
 private:
 	/// === MOVEMENT ===
 
 	bool mouseMoving = false;
-	Vec2Int mousePosPressed;
-	Vec2 camPosePressed;
+	Vec2Int mousePosPressed = {0,0};
+	Vec2 camPosePressed = {0,0};
 
 	/// === DRAW POLY ===
 	void ClearDrawnPoly();
@@ -131,6 +134,6 @@ private:
 //	DrawObject drawObj;
 //	Quad quad;
 	float m_CameraSpeed = 0.6f;
-    int color=0;
+//    int color=0;
 
 };

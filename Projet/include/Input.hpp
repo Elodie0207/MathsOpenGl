@@ -4,20 +4,23 @@
 
 #pragma once
 
+#ifndef GLFW_INCLUDE_NONE
+#define GLFW_INCLUDE_NONE 1
+#endif
+
 #include "GLFW/glfw3.h"
-#include "GL/freeglut.h"
 
 enum class MouseButton
 {
-	Left = GLUT_LEFT_BUTTON,
-	Middle = GLUT_MIDDLE_BUTTON,
-	Right = GLUT_RIGHT_BUTTON,
+	Left = GLFW_MOUSE_BUTTON_LEFT,
+	Middle = GLFW_MOUSE_BUTTON_MIDDLE,
+	Right = GLFW_MOUSE_BUTTON_RIGHT,
 };
 
-enum class MousePressState
+enum class PressState
 {
-	Up = GLUT_UP,
-	Down = GLUT_DOWN,
+	Up = GLFW_RELEASE,
+	Down = GLFW_PRESS,
 };
 
 struct KeyState

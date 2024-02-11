@@ -54,22 +54,22 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 		Vec2 movement(0.0f);
 		float frameMovement = m_CameraSpeed * deltaTime * m_App->GetCamera().GetSize();
 
-		if (m_App->GetKeyDown('z')) // up
+		if (m_App->GetKeyDown(Key::Z)) // up
 		{
 			movement += Vec2(0, +frameMovement);
 		}
 
-		if (m_App->GetKeyDown('s')) // down
+		if (m_App->GetKeyDown(Key::S)) // down
 		{
 			movement += Vec2(0, -frameMovement);
 		}
 
-		if (m_App->GetKeyDown('d')) // right
+		if (m_App->GetKeyDown(Key::D)) // right
 		{
 			movement += Vec2(+frameMovement, 0);
 		}
 
-		if (m_App->GetKeyDown('q')) // down
+		if (m_App->GetKeyDown(Key::Q)) // down
 		{
 			movement += Vec2(-frameMovement, 0);
 		}
@@ -79,12 +79,12 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 			return true;
 		}
 	}
-	else if(m_Tool == Tools::DRAW_POLYGONE && drawingPoly && m_App->GetKeyDown(27))
+	else if(m_Tool == Tools::DRAW_POLYGONE && drawingPoly && m_App->GetKeyDown(Key::Escape))
 	{
 		StopDrawingPoly();
 		return true;
 	}
-	else if(m_Tool == Tools::DRAW_WINDOW && drawingWindow && m_App->GetKeyDown(27))
+	else if(m_Tool == Tools::DRAW_WINDOW && drawingWindow && m_App->GetKeyDown(Key::Escape))
 	{
 		StopDrawingWindow();
 		return true;
@@ -95,21 +95,22 @@ bool ToolsHandler::OnUpdate(float deltaTime)
 void ToolsHandler::Draw(const Mat4 &viewProjMatrix) {
 //	drawObj.Draw(viewProjMatrix);
 //	quad.Draw(viewProjMatrix);
-    if(color==1) {
-        polyDrawn.m_Color = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
-    }
-    else if(color==2) {
-        polyDrawn.m_Color = Vec4(1.0f, 1.0f, 0.0f, 1.0f);
-    }
-    else if(color==3){
-        polyDrawn.m_Color= Vec4(0.0f, 0.0f, 1.0f, 1.0f);
-    }
+//    if(color==1) {
+//        polyDrawn.m_Color = Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+//    }
+//    else if(color==2) {
+//        polyDrawn.m_Color = Vec4(1.0f, 1.0f, 0.0f, 1.0f);
+//    }
+//    else if(color==3){
+//        polyDrawn.m_Color= Vec4(0.0f, 0.0f, 1.0f, 1.0f);
+//    }
 	polyDrawn.Draw(viewProjMatrix);
 	windowDrawn.Draw(viewProjMatrix);
 	windowedPoly.Draw(viewProjMatrix);
 }
 
 static Vec2Int MousePosePressDraw;
+
 bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 {
 	switch (m_Tool)
@@ -206,7 +207,7 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 	{
 		case Tools::MOVE:
 		{
-			if(mouse== MouseButton::Left)
+			if(mouse== MouseButton::Left && mouseMoving)
 			{
 				mouseMoving = false;
 				auto mousePosReleased = state.positionReleased;
@@ -220,6 +221,7 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 				}
 			}
 		}
+		break;
 //		case Tools::FILLING:
 //		{
 //			if (mouse == MouseButton::Left) {
@@ -240,6 +242,7 @@ bool ToolsHandler::OnMouseRelease(MouseButton mouse, const MouseState& state)
 //
 //			}
 //		}
+//		break;
 	}
 	return false;
 }
@@ -260,12 +263,14 @@ bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 				}
 			}
 		}
+		break;
 		case Tools::DRAW_POLYGONE:
 		{
 			if(!drawingPoly) break;
 			polyDrawn.m_Points[polyDrawn.GetPointCount() - 1] = m_App->GetWorldMousePos();
 			return true;
 		}
+			break;
 		case Tools::DRAW_WINDOW:
 		{
 			if(!drawingWindow) break;
@@ -369,15 +374,26 @@ void ToolsHandler::AddPointToWindow(Vec2Int screenPos)
 	}
 }
 
-void ToolsHandler::CHANGE_COLOR(Tools colorTool) {
-    if (colorTool == Tools::RED) {
-        color = 1;
-    } else if (colorTool == Tools::YELLOW) {
-        color = 2;
-    } else if (colorTool == Tools::BLUE) {
-        color = 3;
-    }
+void ToolsHandler::OnImGui()
+{
+	ImGui::Begin("Tools Handler");
+	{
+		ImGui::ColorEdit4("Poly Drawn", &polyDrawn.m_Color.x);
+		ImGui::ColorEdit4("Window Drawn", &windowDrawn.m_Color.x);
+		ImGui::ColorEdit4("Windowed Poly", &windowedPoly.m_Color.x);
+	}
+	ImGui::End();
 }
+
+//void ToolsHandler::CHANGE_COLOR(Tools colorTool) {
+//    if (colorTool == Tools::RED) {
+//        color = 1;
+//    } else if (colorTool == Tools::YELLOW) {
+//        color = 2;
+//    } else if (colorTool == Tools::BLUE) {
+//        color = 3;
+//    }
+//}
 
 
 
