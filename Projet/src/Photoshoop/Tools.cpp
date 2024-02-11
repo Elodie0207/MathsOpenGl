@@ -160,17 +160,6 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			}
 		}
 		break;
-//		case Tools::SWEEP_FILLING:
-//		{
-//			if(mouse == MouseButton::Left) {
-//				MousePosePressDraw = state.positionPressed;
-//				Math::polygon_fill(polyDrawn.GetPoints(), *m_App, Parameters::GetColor());
-//
-//				// TODO: get from the window the min and max (i.e. bounding box)
-//				// TODO: launch using the 'MousePosePressDraw' (x/y) and min max with the 'Math::fillRegionConnexity4'.
-//			}
-//		}
-//		break;
 		case Tools::AREA_FILLING:
 		{
 			if(mouse == MouseButton::Left) {
@@ -185,48 +174,13 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			}
 		}
 		break;
-//        case Tools::WINDOWING: {
-//            if (polyDrawn.GetPointCount() > 2 && windowDrawn.GetPointCount() > 2) {
-//                auto poly = polyDrawn.GetPoints();
-//                auto window = windowDrawn.GetLoopPoints();
-//                auto clippedPoints = Math::sutherlandHodgman(poly, window, *m_App);
-//
-//                windowedPoly.m_Points.clear();
-//
-//                std::cout << "Original Polygon Points:" << std::endl;
-//                for (const auto &p: poly) {
-//                    std::cout << "(" << p.x << ", " << p.y << ")" << std::endl;
-//                }
-//
-//                std::cout << "Window Points:" << std::endl;
-//                for (const auto &p: window) {
-//                    std::cout << "(" << p.x << ", " << p.y << ")" << std::endl;
-//                }
-//
-//                std::cout << "Intermediate Clipped Polygon Points:" << std::endl;
-//                for (const auto &p: clippedPoints) {
-//                    std::cout << "(" << p.x << ", " << p.y << ")" << std::endl;
-//                }
-//
-//                std::cout << "Clipped Polygon Points:" << std::endl;
-//                if (!clippedPoints.empty()) {
-//                    for (const auto &p: clippedPoints) {
-//                        windowedPoly.m_Points.emplace_back(p.x, p.y);
-//                        std::cout << "\033[32m(" << p.x << ", " << p.y << ")\033[0m" << std::endl;
-//                    }
-//                } else {
-//                    std::cout << "No clipped points (Polygon outside the window)" << std::endl;
-//                }
-//            }
-//        }
-//            break;
 		case Tools::DRAWING:
 		{
 			if(mouse == MouseButton::Left)
 			{
 				m_IsDrawing = true;
 				m_LastDrawingPos = m_App->ScreenToWorldPos(state.positionPressed);
-				DrawWorldPos(m_LastDrawingPos, m_DrawingSize);
+				m_App->WriteWorldPixel(m_LastDrawingPos, m_BorderColor, m_DrawingSize);
 			}
 		}
 			break;
@@ -301,33 +255,7 @@ bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 		case Tools::DRAWING:
 		{
 			if(m_IsDrawing) {
-				// Bresenham's line algorithm
-				Vec2Int target = m_App->ScreenToWorldPos(mousePos);
-				int dx = std::abs(target.x - m_LastDrawingPos.x);
-				int dy = std::abs(target.y - m_LastDrawingPos.y);
-
-				int sx = (m_LastDrawingPos.x < target.x) ? 1 : -1;
-				int sy = (m_LastDrawingPos.y < target.y) ? 1 : -1;
-
-				int err = dx - dy;
-
-				do
-				{
-					DrawWorldPos({m_LastDrawingPos.x, m_LastDrawingPos.y}, m_DrawingSize);
-
-					int e2 = 2 * err;
-					if (e2 > -dy)
-					{
-						err -= dy;
-						m_LastDrawingPos.x += sx;
-					}
-					if (e2 < dx)
-					{
-						err += dx;
-						m_LastDrawingPos.y += sy;
-					}
-				}
-				while(m_LastDrawingPos.x != target.x && m_LastDrawingPos.y != target.y);
+				m_App->WriteWorldLine(m_LastDrawingPos, m_App->ScreenToWorldPos(mousePos), m_BorderColor, m_DrawingSize);
 			}
 		}
 		break;
@@ -528,6 +456,18 @@ void ToolsHandler::OnImGui()
 						Math::polygon_fill(poly.Polygon.GetPoints(), *m_App, poly.Polygon.m_Color);
 					}
 
+					if(ImGui::Button("Write Polygon To Texture"))
+					{
+						auto pts = poly.Polygon.GetLoopPoints();
+						for (uint64_t i = 1; i < pts.size(); ++i)
+						{
+							const auto& pt1 = pts[i - 1];
+							const auto& pt2 = pts[i - 0];
+
+							m_App->WriteWorldLine(pt1, pt2, poly.Polygon.m_Color, 3);
+						}
+					}
+
 					if(poly.IsWindow && ImGui::Button("Windowing"))
 					{
 						auto aabb = poly.Polygon.GetBoundBox();
@@ -591,24 +531,6 @@ void ToolsHandler::OnImGui()
 		ImGui::End();
 	}
 }
-
-void ToolsHandler::DrawWorldPos(Vec2Int pos, int size)
-{
-	float hSize = size / 2.0f;
-	Vec2Int min = pos - (int)hSize;
-	Vec2Int max = pos + (int)hSize;
-
-	for (int x = min.x; x <= max.x; ++x) {
-		for (int y = min.y; y <= max.y; ++y) {
-			Vec2Int currentPx = {x,y};
-			auto dst = Math::Distance(Vec2(pos), Vec2(currentPx));
-			if(dst < std::max(hSize, 1.0f)) {
-				m_App->WriteWorldPixel(currentPx, m_BorderColor);
-			}
-		}
-	}
-}
-
 
 
 

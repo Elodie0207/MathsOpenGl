@@ -519,6 +519,65 @@ void Application::WriteWorldPixel(Vec2 worldPos, Vec4 color01)
 //	m_PixelCache[index][pixel] = color01;
 }
 
+void Application::WriteScreenPixel(Vec2Int screenPos, Vec4 color01, int size)
+{
+	Vec2 worldPos = ScreenToWorldPos(screenPos);
+	WriteWorldPixel(worldPos, color01, size);
+}
+
+void Application::WriteWorldPixel(Vec2 pos, Vec4 color01, int size)
+{
+	float hSize = size / 2.0f;
+	Vec2Int min = pos - hSize;
+	Vec2Int max = pos + hSize;
+
+	for (int x = min.x; x <= max.x; ++x) {
+		for (int y = min.y; y <= max.y; ++y) {
+			Vec2Int currentPx = {x,y};
+			auto dst = Math::Distance(Vec2(pos), Vec2(currentPx));
+			if(dst < std::max(hSize, 1.0f)) {
+				WriteWorldPixel(currentPx, color01);
+			}
+		}
+	}
+}
+
+void Application::WriteWorldLine(Vec2 from, Vec2 to, Vec4 color01, int size)
+{
+	// Bresenham's line algorithm
+	int dx = std::abs(to.x - from.x);
+	int dy = std::abs(to.y - from.y);
+
+	int sx = (from.x < to.x) ? 1 : -1;
+	int sy = (from.y < to.y) ? 1 : -1;
+
+	int err = dx - dy;
+
+	do
+	{
+		WriteWorldPixel({from.x, from.y}, color01, size);
+
+		int e2 = 2 * err;
+		if (e2 > -dy)
+		{
+			err -= dy;
+			from.x += sx;
+		}
+		if (e2 < dx)
+		{
+			err += dx;
+			from.y += sy;
+		}
+	}
+	while(from.x != to.x || from.y != to.y);
+}
+void Application::WriteScreenLine(Vec2 fromScreenPos, Vec2 toScreenPos, Vec4 color01, int size)
+{
+	Vec2 from = ScreenToWorldPos(fromScreenPos);
+	Vec2 to = ScreenToWorldPos(toScreenPos);
+	WriteWorldLine(from, to, color01);
+}
+
 Vec4 Application::ReadScreenPixel(Vec2Int screenPos)
 {
 	Vec2 worldPos = ScreenToWorldPos(screenPos);
