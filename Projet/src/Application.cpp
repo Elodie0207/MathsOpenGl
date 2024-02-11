@@ -216,8 +216,8 @@ void Application::Run() {
 		ImGui::NewFrame();
 
 		// 1. Show the big demo window (Most of the sample code is in ImGui::ShowDemoWindow()! You can browse its code to learn more about Dear ImGui!).
-		if (show_demo_window)
-			ImGui::ShowDemoWindow(&show_demo_window);
+//		if (show_demo_window)
+//			ImGui::ShowDemoWindow(&show_demo_window);
 
 
 		Menu();
@@ -276,34 +276,6 @@ void Application::Menu()
 {
 	ImGui::Begin("Tools");
 	{
-		const std::vector<std::string> tools = { "NONE",
-												  "MOVE",
-												  "DRAW_POLYGONE",
-												  "DRAW_WINDOW",
-												  "WINDOWING",
-												  "SWEEP_FILLING",
-												  "AREA_FILLING",
-												  "DRAWING",
-		};
-
-		auto tool = m_Tools.GetSelectedTool();
-		auto toolIndex = (int)tool;
-		const std::string& currentTargetImage = tools[toolIndex];
-		if (ImGui::BeginCombo("Tool", currentTargetImage.c_str())) {
-			for (int i = 0; i < tools.size(); i++) {
-				const bool is_selected = (toolIndex == i);
-				const std::string& iImage = tools[i];
-				if (ImGui::Selectable(iImage.c_str(), is_selected)) {
-					toolIndex = i;
-					m_Tools.SetTool((Tools)i);
-				}
-
-				// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
-				if (is_selected) ImGui::SetItemDefaultFocus();
-			}
-			ImGui::EndCombo();
-		}
-
 		if(ImGui::CollapsingHeader("Camera")) {
 			if (ImGui::Button("Reset Position")) {
 				m_Camera.SetPosition({0, 0});
@@ -545,6 +517,65 @@ void Application::WriteWorldPixel(Vec2 worldPos, Vec4 color01)
 	GetOrCreateTexture(index)->SetPixel4(pixel, color01);
 
 //	m_PixelCache[index][pixel] = color01;
+}
+
+void Application::WriteScreenPixel(Vec2Int screenPos, Vec4 color01, int size)
+{
+	Vec2 worldPos = ScreenToWorldPos(screenPos);
+	WriteWorldPixel(worldPos, color01, size);
+}
+
+void Application::WriteWorldPixel(Vec2 pos, Vec4 color01, int size)
+{
+	float hSize = size / 2.0f;
+	Vec2Int min = pos - hSize;
+	Vec2Int max = pos + hSize;
+
+	for (int x = min.x; x <= max.x; ++x) {
+		for (int y = min.y; y <= max.y; ++y) {
+			Vec2Int currentPx = {x,y};
+			auto dst = Math::Distance(Vec2(pos), Vec2(currentPx));
+			if(dst < std::max(hSize, 1.0f)) {
+				WriteWorldPixel(currentPx, color01);
+			}
+		}
+	}
+}
+
+void Application::WriteWorldLine(Vec2Int from, Vec2Int to, Vec4 color01, int size)
+{
+	// Bresenham's line algorithm
+	int dx = std::abs(to.x - from.x);
+	int dy = std::abs(to.y - from.y);
+
+	int sx = (from.x < to.x) ? 1 : -1;
+	int sy = (from.y < to.y) ? 1 : -1;
+
+	int err = dx - dy;
+
+	do
+	{
+		WriteWorldPixel({from.x, from.y}, color01, size);
+
+		int e2 = 2 * err;
+		if (e2 > -dy)
+		{
+			err -= dy;
+			from.x += sx;
+		}
+		if (e2 < dx)
+		{
+			err += dx;
+			from.y += sy;
+		}
+	}
+	while(from.x != to.x || from.y != to.y);
+}
+void Application::WriteScreenLine(Vec2Int fromScreenPos, Vec2Int toScreenPos, Vec4 color01, int size)
+{
+	Vec2Int from = ScreenToWorldPos(fromScreenPos);
+	Vec2Int to = ScreenToWorldPos(toScreenPos);
+	WriteWorldLine(from, to, color01);
 }
 
 Vec4 Application::ReadScreenPixel(Vec2Int screenPos)
