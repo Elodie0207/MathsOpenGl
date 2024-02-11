@@ -359,6 +359,14 @@ void Math::polygon_fill(const std::vector<Point>& poly, Application& app, const 
 
 // Effectue le remplissage par region
 void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill) {
+	std::vector<Vec2Int> positionToVisit = {{x,y}};
+
+	while(!positionToVisit.empty())
+	{
+		
+	}
+
+	/*
     // Vérifier si les coordonnées sont dans les limites de l'image
     if (x < min.x || x >= max.x || y < min.y || y >= max.y) return;
 
@@ -373,4 +381,5 @@ void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Applicat
         fillRegionConnexity4(x + 0, y + 1, min, max, app, colorContour, colorFill); // Haut
         fillRegionConnexity4(x + 1, y + 0, min, max, app, colorContour, colorFill); // Droite
     }
+	*/
 }
