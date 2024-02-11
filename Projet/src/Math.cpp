@@ -369,8 +369,8 @@ void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Applicat
         {continue;}
 
         auto color = app.ReadWorldPixel(position);
-        glm::vec<4, bool> c1 = glm::epsilonEqual(color, colorFill, Vec4((1.f/256.f) * 0.75f));
-        glm::vec<4, bool> c2 = glm::epsilonEqual(color, colorContour, Vec4((1.f/256.f) * 0.75f));
+        glm::vec<4, bool> c1 = glm::epsilonEqual(color, colorFill, Vec4(0.01f));
+        glm::vec<4, bool> c2 = glm::epsilonEqual(color, colorContour, Vec4(0.01f));
         
         if (!((c1.x && c1.y && c1.z && c1.w) || (c2.x && c2.y && c2.z && c2.w)))
         {
@@ -399,4 +399,46 @@ void Math::fillRegionConnexity4(int x, int y, Vec2Int min, Vec2Int max, Applicat
         fillRegionConnexity4(x + 1, y + 0, min, max, app, colorContour, colorFill); // Droite
     }
 	*/
+}
+
+//remplissage ligne par ligne
+void Math::fillRegionLineByLine(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill)
+{
+    std::vector<Vec2Int> positionsToVisit = {{x,y}};
+
+    while(!positionsToVisit.empty())
+    {
+        Vec2Int position = positionsToVisit[positionsToVisit.size()-1];
+        positionsToVisit.pop_back();
+
+        if (position.x < min.x || position.x >= max.x || position.y < min.y || position.y >= max.y)
+        {continue;}
+
+        if (!shouldBeFilled(position.x, position.y, app, colorContour, colorFill))
+            continue;
+
+        int left = position.x;
+        while (left > min.x && shouldBeFilled(left - 1, position.y, app, colorContour, colorFill)) left--;
+
+        int right = position.x;
+        while (right < max.x && shouldBeFilled(right + 1, position.y, app, colorContour, colorFill)) right++;
+
+        // Remplir la ligne et préparer la visite des lignes supérieures et inférieures
+        for (int i = left; i <= right; i++) {
+            app.WriteWorldPixel(Vec2Int(i, position.y), colorFill);
+
+            if (position.y > min.y && shouldBeFilled(i, position.y - 1, app, colorContour, colorFill))
+                positionsToVisit.push_back(Vec2Int(i, position.y - 1));
+            if (position.y < max.y - 1 && shouldBeFilled(i, position.y + 1, app, colorContour, colorFill))
+                positionsToVisit.push_back(Vec2Int(i, position.y + 1));
+        }
+
+    }
+}
+
+bool Math::shouldBeFilled(int x, int y, Application& app, const Color& colorContour, const Color& colorFill) {
+    auto color = app.ReadWorldPixel(Vec2Int(x, y));
+    glm::vec<4, bool> isFill = glm::epsilonEqual(color, colorFill, Vec4(0.01f));
+    glm::vec<4, bool> isContour = glm::epsilonEqual(color, colorContour, Vec4(0.01f));
+    return !(isFill.x && isFill.y && isFill.z && isFill.w) && !(isContour.x && isContour.y && isContour.z && isContour.w);
 }

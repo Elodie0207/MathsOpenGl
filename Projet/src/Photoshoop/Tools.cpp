@@ -169,7 +169,8 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 				auto halfSize = m_FillSize * 0.5f;
 				auto min = MousePosePressDraw - halfSize;
 				auto max = MousePosePressDraw + halfSize;
-				Math::fillRegionConnexity4(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+				//Math::fillRegionConnexity4(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+                Math::fillRegionLineByLine(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
 
 				// TODO: get from the window the min and max (i.e. bounding box)
 				// TODO: launch using the 'MousePosePressDraw' (x/y) and min max with the 'Math::fillRegionConnexity4'.
