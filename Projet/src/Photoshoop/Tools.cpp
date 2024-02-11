@@ -110,6 +110,18 @@ void ToolsHandler::Draw(const Mat4 &viewProjMatrix) {
 }
 
 static Vec2 MousePosePressDraw;
+static float radius =100;
+bool CheckCircle(int x, int y)
+{
+    // Calcul de la distance au carré entre le point (x, y) et le centre du cercle (MousePosePressDraw)
+    float dx = x - MousePosePressDraw.x;
+    float dy = y - MousePosePressDraw.y;
+    float distanceSquared = dx * dx + dy * dy;
+
+    // Vérification si la distance au carré est inférieure au carré du rayon
+    return distanceSquared < (radius * radius);
+}
+
 
 bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 {
@@ -169,10 +181,10 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 				auto halfSize = m_FillSize * 0.5f;
 				auto min = MousePosePressDraw - halfSize;
 				auto max = MousePosePressDraw + halfSize;
-				Math::fillRegionConnexity4(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+				Math::fillRegion(MousePosePressDraw.x, MousePosePressDraw.y, &CheckCircle, *m_App, m_BorderColor, m_FillColor);
                 //pour la recusive
                 //Math::fillRegionConnexity4Recursive(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
-                //pour le ligne par leigne 
+                //pour le ligne par leigne
                 //Math::fillRegionLineByLine(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
 
 				// TODO: get from the window the min and max (i.e. bounding box)

@@ -433,6 +433,32 @@ void Math::fillRegionLineByLine(int x, int y, Vec2Int min, Vec2Int max, Applicat
     }
 }
 
+//remplissage de bubulleee  
+void Math::fillRegion(int x, int y, std::function<bool(int,int)> boundChecker, Application& app, const Color& colorContour, const Color& colorFill)
+{
+    std::vector<Vec2Int> positionsToVisit = {{x,y}};
+
+    while(!positionsToVisit.empty()) {
+        Vec2Int position = positionsToVisit.back();
+        positionsToVisit.pop_back();
+
+        // Utilisation de boundChecker pour vérifier les limites et shouldBeFilled pour la logique de remplissage
+        if (!boundChecker(position.x, position.y) || !shouldBeFilled(position.x, position.y, app, colorContour, colorFill)) {
+            continue;
+        }
+
+        // Remplir le pixel avec la couleur de remplissage
+        app.WriteWorldPixel(position, colorFill);
+
+        // Ajouter les pixels voisins à la liste des positions à visiter
+        positionsToVisit.push_back(Vec2Int(position.x + 1, position.y)); // Droite
+        positionsToVisit.push_back(Vec2Int(position.x - 1, position.y)); // Gauche
+        positionsToVisit.push_back(Vec2Int(position.x, position.y + 1)); // Bas
+        positionsToVisit.push_back(Vec2Int(position.x, position.y - 1)); // Haut
+    }
+}
+
+
 bool Math::shouldBeFilled(int x, int y, Application& app, const Color& colorContour, const Color& colorFill) {
     auto color = app.ReadWorldPixel(Vec2Int(x, y));
     glm::vec<4, bool> isFill = glm::epsilonEqual(color, colorFill, Vec4(0.01f));
