@@ -9,6 +9,7 @@
 #include "Renderer/DrawObject.hpp"
 #include "Renderer/Poly.hpp"
 #include "Renderer/Quad.hpp"
+#include "Renderer/Circle.hpp"
 
 class Application;
 
@@ -31,10 +32,18 @@ enum class Tools
 	DRAW_POLYGONE,
 	DRAW_WINDOW,
 	WINDOWING,
-	SWEEP_FILLING,
 	AREA_FILLING,
 	DRAWING,
 };
+
+enum AREA_FILLING_TYPE
+{
+	AREA_FILLING_RECURSE,
+	AREA_FILLING_STACK,
+	AREA_FILLING_LINE_BY_LINE,
+	AREA_FILLING_CUSTOM,
+};
+
 
 class ToolsHandler {
 public:
@@ -145,6 +154,11 @@ private:
 	Vec2 m_FillSize = {1000, 1000};
 	Poly m_BorderPoly;
 
+	Circle m_Circle;
+	static Vec2 s_MousePosePressDraw;// = {0,0};
+	static float s_CircleFillingRadius;// = 100;
+	static bool CheckCircle(int x, int y);
+
 	//TODO: Add function & variables to make the filling here.
 	/// === DRAWING ===
 	Color m_BorderColor = Color(0);
@@ -156,6 +170,7 @@ private:
 	std::vector<RenderObject> m_Polygons;
 
 	Tools m_Tool = Tools::MOVE;
+	AREA_FILLING_TYPE m_AreaFillingType = AREA_FILLING_LINE_BY_LINE;
 	Application* m_App;
 
 //	DrawObject drawObj;
