@@ -6,6 +6,8 @@
 
 #include "Core.hpp"
 #include "Math.hpp"
+#include "Helper.hpp"
+#include "AABB2D.hpp"
 
 class Poly
 {
@@ -22,6 +24,7 @@ public:
 
 	std::vector<Point> GetLoopPoints() const;
 	std::vector<Point> GetPoints() const;
+	AABB2D GetBoundBox() const;
 
 	template<typename real>
 	inline std::vector<glm::vec<2, real, glm::defaultp>> GetNormals(bool clockwise = true) const {
@@ -49,7 +52,7 @@ public:
 	const Vec2Int& operator[](int index) const;
 	Vec2Int& operator[](int index);
 
-	Vec4 m_Color = Vec4(1.0f);
+	Vec4 m_Color = ColorHelper::Random();
 
 	std::vector<Vec2Int> m_Points;
 };
