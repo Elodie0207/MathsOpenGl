@@ -13,14 +13,20 @@ class Poly
 {
 public:
 	Poly() = default;
-	Poly(const std::vector<Vec2Int>& points);
-	Poly(const std::initializer_list<Vec2Int>& points);
+
+	Poly(const std::vector<Vec2Int>& points, Vec2 position = {0,0});
+	Poly(const std::initializer_list<Vec2Int>& points, Vec2 position = {0,0});
+
+	Poly(const std::vector<Vec2>& points, Vec2 position = {0,0});
+	Poly(const std::initializer_list<Vec2>& points, Vec2 position = {0,0});
 	~Poly();
 
 	bool IsValid() const;
 	int GetPointCount() const;
 
 	void Draw(const Mat4& viewProjMatrix) const;
+
+	inline void Move(const Vec2& movement) { for (auto& pos : m_Points) pos += movement; };
 
 	std::vector<Point> GetLoopPoints() const;
 	std::vector<Point> GetPoints() const;
@@ -43,16 +49,15 @@ public:
 		}
 		return normals;
 	}
-	std::vector<Vec2Int>::iterator begin();
-	std::vector<Vec2Int>::iterator end();
+	std::vector<Vec2>::iterator begin();
+	std::vector<Vec2>::iterator end();
 
-	std::vector<Vec2Int>::const_iterator cbegin() const;
-	std::vector<Vec2Int>::const_iterator cend() const;
+	std::vector<Vec2>::const_iterator cbegin() const;
+	std::vector<Vec2>::const_iterator cend() const;
 
-	const Vec2Int& operator[](int index) const;
-	Vec2Int& operator[](int index);
+	const Vec2& operator[](int index) const;
+	Vec2& operator[](int index);
 
 	Vec4 m_Color = ColorHelper::Random();
-
-	std::vector<Vec2Int> m_Points;
+	std::vector<Vec2> m_Points;
 };

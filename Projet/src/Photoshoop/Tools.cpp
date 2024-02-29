@@ -6,6 +6,7 @@
 #include "Application.hpp"
 #include "Parameters.hpp"
 
+int current_item = 0; // Start at 'Heart'
 Vec2 ToolsHandler::s_MousePosePressDraw = {0, 0};
 float ToolsHandler::s_CircleFillingRadius = 100;
 
@@ -35,8 +36,8 @@ void ToolsHandler::SetTool(Tools tool)
 ToolsHandler::ToolsHandler(Application * app) : m_App(app), m_Circle(s_MousePosePressDraw, s_CircleFillingRadius, m_FillColor)
 {
 	REI_ASSERT(m_App != nullptr, "The application is not valid.");
-	m_Polygons.emplace_back(Poly({{128, 128}, {128, 640}, {640, 640}}), false);
-	m_Polygons.emplace_back(Poly({{0, 0}, {0, 512}, {512, 512}, {512, 0}}), true);
+	m_Polygons.emplace_back(Poly(std::vector<Vec2>{{128, 128}, {128, 640}, {640, 640}}), false);
+	m_Polygons.emplace_back(Poly(std::vector<Vec2>{{0, 0}, {0, 512}, {512, 512}, {512, 0}}), true);
 
 	polyDrawn = {};
 	windowDrawn = {};
@@ -55,6 +56,7 @@ void ToolsHandler::Initialize() {
 //	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
 	polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
 	windowDrawn.m_Color = Vec4(0.8, 0.3, 0.2, 1);
+
 }
 
 void ToolsHandler::Destroy()
@@ -225,6 +227,44 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			}
 		}
 			break;
+		case Tools::FORME:
+		{
+			if(mouse == MouseButton::Left)
+			{
+				auto pos = m_App->ScreenToWorldPos(state.positionPressed);
+				switch (m_Forme) {
+					case FORME_HEART:
+					{
+						auto poly = Figures::CreateHeart(heartSize);
+						poly.Move(pos);
+						m_Polygons.emplace_back(poly);
+					}
+						break;
+					case FORME_STAR:
+					{
+						auto poly = Figures::CreateStar(armLength, numArms);
+						poly.Move(pos);
+						m_Polygons.emplace_back(poly);
+					}
+						break;
+					case FORME_POLYGONE:
+					{
+						auto poly = Figures::CreatePolygone(armSize, numSides);
+						poly.Move(pos);
+						m_Polygons.emplace_back(poly);
+					}
+						break;
+					case FORME_ELLIPSE:
+					{
+						auto poly = Figures::CreateEllipse(numSegments, radiusX, radiusY);
+						poly.Move(pos);
+						m_Polygons.emplace_back(poly);
+					}
+						break;
+				}
+			}
+		}
+			break;
     }
     return false;
 }
@@ -379,7 +419,12 @@ void ToolsHandler::StopDrawingWindow()
 		windowDrawn.m_Points.clear();
 	}
 }
-
+/*void ToolsHandler::AddHeartAtPosition(Vec2Int screenPos) {
+    Vec3 worldPos = S(screenPos);
+    glPushMatrix();
+    glTranslatef(position.x, position.y, position.z);
+    glPopMatrix();
+}*/
 void ToolsHandler::AddPointToWindow(Vec2Int screenPos)
 {
 	if(drawingWindow)
@@ -419,6 +464,8 @@ void ToolsHandler::OnImGui()
 											 "WINDOWING",
 											 "AREA_FILLING",
 											 "DRAWING",
+											 "FORME",
+
 	};
 
 	std::vector<std::string> sweep_filling_type_names = {
@@ -434,6 +481,7 @@ void ToolsHandler::OnImGui()
 			auto tool = m_Tool;
 			auto toolIndex = (int) tool;
 			const std::string &currentTargetImage = tools[toolIndex];
+
 			if (ImGui::BeginCombo("Tool", currentTargetImage.c_str())) {
 				for (int i = 0; i < tools.size(); i++) {
 					const bool is_selected = (toolIndex == i);
@@ -513,6 +561,40 @@ void ToolsHandler::OnImGui()
 					ImGui::DragInt("Drawing Size", &m_DrawingSize, 1, 1, INT_MAX);
 					break;
 			}
+
+			if(m_Tool == Tools::FORME)
+			{
+				const char* items[] = { "Heart", "Star", "Polygone", "Ellipse" };
+				ImGui::Combo("Formes", reinterpret_cast<int*>(&m_Forme), items, IM_ARRAYSIZE(items));
+
+				switch (m_Forme)
+				{
+					case FORME_HEART:
+					{
+						ImGui::DragFloat("Heart Size",&heartSize);
+					}
+						break;
+					case FORME_STAR:
+					{
+						ImGui::DragFloat("Arm Length",&armLength);
+						ImGui::DragInt("Num Arms",&numArms);
+					}
+						break;
+					case FORME_POLYGONE:
+					{
+						ImGui::DragFloat("Arm Size",&armSize);
+						ImGui::DragInt("Num Sides",&numSides);
+					}
+						break;
+					case FORME_ELLIPSE:
+					{
+						ImGui::DragInt("Num Segments",&numSegments);
+						ImGui::DragFloat("Radius X",&radiusX);
+						ImGui::DragFloat("Radius Y",&radiusY);
+					}
+						break;
+				}
+			}
 		}
 		ImGui::End();
 	}
@@ -549,7 +631,7 @@ void ToolsHandler::OnImGui()
 									poly.Polygon.m_Points.erase(poly.Polygon.m_Points.begin() + i);
 								} else {
 									ImGui::SameLine();
-									ImGui::DragInt2("Coordinates", glm::value_ptr(poly.Polygon.m_Points[i]));
+									ImGui::DragFloat2("Coordinates", glm::value_ptr(poly.Polygon.m_Points[i]));
 								}
 							}
 							ImGui::PopID();
@@ -629,6 +711,8 @@ void ToolsHandler::OnImGui()
 					{
 						m_Polygons.erase(m_Polygons.begin() + polygonIndex);
 					}
+
+
 				}
 			}
 			ImGui::PopID();

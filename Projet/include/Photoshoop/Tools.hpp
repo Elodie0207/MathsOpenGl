@@ -9,9 +9,17 @@
 #include "Renderer/DrawObject.hpp"
 #include "Renderer/Poly.hpp"
 #include "Renderer/Quad.hpp"
+#include "Renderer/Figures.h"
 #include "Renderer/Circle.hpp"
 
 class Application;
+
+enum FORME_ENUM {
+	FORME_HEART,
+	FORME_STAR,
+	FORME_POLYGONE,
+	FORME_ELLIPSE,
+};
 
 struct RenderObject
 {
@@ -21,6 +29,7 @@ public:
 	inline RenderObject(Poly polygon, bool isWindow = false) : Polygon(polygon), IsWindow(isWindow), Id() {}
 
 	Poly Polygon = Poly();
+
 	UUID Id = UUID();
 	bool IsWindow = false;
 };
@@ -34,6 +43,7 @@ enum class Tools
 	WINDOWING,
 	AREA_FILLING,
 	DRAWING,
+	FORME,
 };
 
 enum AREA_FILLING_TYPE
@@ -65,7 +75,7 @@ public:
 	 * Function called once when the application is initializing.
 	 */
 	void Initialize();
-
+    static void AddHeartAtPosition(Vec2Int screenPos);
 	/**
 	 * Function called once when the application is quitting.
 	 */
@@ -129,6 +139,7 @@ private:
 	void AddPointToPoly(Vec2Int screenPos);
 	void StopDrawingPoly();
 	Poly polyDrawn;
+
 	bool drawingPoly = false;
 
 	/// === DRAW WINDOW ===
@@ -178,5 +189,10 @@ private:
 	float m_CameraSpeed = 0.6f;
 //    int color=0;
 
+	FORME_ENUM m_Forme = FORME_HEART;
+	float heartSize = 100.f;
+	float armLength = 100.f; int numArms = 5;
+	float armSize = 100; int numSides = 5;
+	int numSegments = 100; float radiusX = 100.f; float radiusY = 5.f;
 
 };

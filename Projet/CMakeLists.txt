@@ -37,6 +37,8 @@ add_executable(MathsOpenGl
         include/SmartPtr.hpp
         include/Helper.hpp
         include/AABB2D.hpp
+        include/Renderer/Figures.h
+        src/Renderer/Figures.cpp
         src/Renderer/Circle.cpp
         include/Renderer/Circle.hpp
 )
