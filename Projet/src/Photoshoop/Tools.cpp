@@ -6,6 +6,8 @@
 #include "Application.hpp"
 #include "Parameters.hpp"
 
+int current_item = 0; // Start at 'Heart'
+
 // ===================== COMMON =====================
 void ToolsHandler::SetTool(Tools tool)
 {
@@ -24,8 +26,8 @@ void ToolsHandler::SetTool(Tools tool)
 ToolsHandler::ToolsHandler(Application * app) : m_App(app)
 {
 	REI_ASSERT(m_App != nullptr, "The application is not valid.");
-	m_Polygons.emplace_back(Poly({{128, 128}, {128, 640}, {640, 640}}), false);
-	m_Polygons.emplace_back(Poly({{0, 0}, {0, 512}, {512, 512}, {512, 0}}), true);
+	m_Polygons.emplace_back(Poly(std::vector<Vec2>{{128, 128}, {128, 640}, {640, 640}}), false);
+	m_Polygons.emplace_back(Poly(std::vector<Vec2>{{0, 0}, {0, 512}, {512, 512}, {512, 0}}), true);
 
 	polyDrawn = {};
 	windowDrawn = {};
@@ -190,8 +192,44 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			}
 		}
 			break;
-
-
+		case Tools::FORME:
+		{
+			if(mouse == MouseButton::Left)
+			{
+				auto pos = m_App->ScreenToWorldPos(state.positionPressed);
+				switch (m_Forme) {
+					case FORME_HEART:
+					{
+						auto poly = Figures::CreateHeart(heartSize);
+						poly.Move(pos);
+						m_Polygons.emplace_back(poly);
+					}
+						break;
+					case FORME_STAR:
+					{
+						auto poly = Figures::CreateStar(armLength, numArms);
+						poly.Move(pos);
+						m_Polygons.emplace_back(poly);
+					}
+						break;
+					case FORME_POLYGONE:
+					{
+						auto poly = Figures::CreatePolygone(armSize, numSides);
+						poly.Move(pos);
+						m_Polygons.emplace_back(poly);
+					}
+						break;
+					case FORME_ELLIPSE:
+					{
+						auto poly = Figures::CreateEllipse(numSegments, radiusX, radiusY);
+						poly.Move(pos);
+						m_Polygons.emplace_back(poly);
+					}
+						break;
+				}
+			}
+		}
+			break;
     }
     return false;
 }
@@ -386,6 +424,7 @@ void ToolsHandler::OnImGui()
 											 "SWEEP_FILLING",
 											 "AREA_FILLING",
 											 "DRAWING",
+											 "FORME",
 
 	};
 	ImGui::Begin("Tools Handler");
@@ -394,6 +433,7 @@ void ToolsHandler::OnImGui()
 			auto tool = m_Tool;
 			auto toolIndex = (int) tool;
 			const std::string &currentTargetImage = tools[toolIndex];
+
 			if (ImGui::BeginCombo("Tool", currentTargetImage.c_str())) {
 				for (int i = 0; i < tools.size(); i++) {
 					const bool is_selected = (toolIndex == i);
@@ -409,6 +449,7 @@ void ToolsHandler::OnImGui()
 				ImGui::EndCombo();
 			}
 		}
+
 		{
 			if (m_Tool == Tools::DRAW_POLYGONE) ImGui::ColorEdit4("Poly Drawn", &polyDrawn.m_Color.x);
 			if (m_Tool == Tools::DRAW_WINDOW) ImGui::ColorEdit4("Window Drawn", &windowDrawn.m_Color.x);
@@ -425,6 +466,40 @@ void ToolsHandler::OnImGui()
 				ImGui::ColorEdit4("Border Color", glm::value_ptr(m_BorderColor));
 				ImGui::ColorEdit4("Fill Color", glm::value_ptr(m_FillColor));
 				ImGui::DragFloat2("Fill Size", glm::value_ptr(m_FillSize), 1);
+			}
+
+			if(m_Tool == Tools::FORME)
+			{
+				const char* items[] = { "Heart", "Star", "Polygone", "Ellipse" };
+				ImGui::Combo("Formes", reinterpret_cast<int*>(&m_Forme), items, IM_ARRAYSIZE(items));
+
+				switch (m_Forme)
+				{
+					case FORME_HEART:
+					{
+						ImGui::DragFloat("Heart Size",&heartSize);
+					}
+						break;
+					case FORME_STAR:
+					{
+						ImGui::DragFloat("Arm Length",&armLength);
+						ImGui::DragInt("Num Arms",&numArms);
+					}
+						break;
+					case FORME_POLYGONE:
+					{
+						ImGui::DragFloat("Arm Size",&armSize);
+						ImGui::DragInt("Num Sides",&numSides);
+					}
+						break;
+					case FORME_ELLIPSE:
+					{
+						ImGui::DragInt("Num Segments",&numSegments);
+						ImGui::DragFloat("Radius X",&radiusX);
+						ImGui::DragFloat("Radius Y",&radiusY);
+					}
+						break;
+				}
 			}
 		}
 		ImGui::End();
@@ -462,7 +537,7 @@ void ToolsHandler::OnImGui()
 									poly.Polygon.m_Points.erase(poly.Polygon.m_Points.begin() + i);
 								} else {
 									ImGui::SameLine();
-									ImGui::DragInt2("Coordinates", glm::value_ptr(poly.Polygon.m_Points[i]));
+									ImGui::DragFloat2("Coordinates", glm::value_ptr(poly.Polygon.m_Points[i]));
 								}
 							}
 							ImGui::PopID();

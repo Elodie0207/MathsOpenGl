@@ -5,12 +5,36 @@
 #include "Renderer/Poly.hpp"
 
 
-Poly::Poly(const std::vector<Vec2Int>& points) : m_Points(points)
+Poly::Poly(const std::vector<Vec2Int>& points, Vec2 position) : m_Points(points.size())
 {
+	for (int i = 0; i < points.size(); ++i) {
+		m_Points[i] = Vec2(points[i]) + position;
+	}
 }
 
-Poly::Poly(const std::initializer_list<Vec2Int>& points) : m_Points(points)
+Poly::Poly(const std::initializer_list<Vec2Int>& points, Vec2 position) : m_Points()
 {
+	m_Points.reserve(points.size());
+	for(auto& p : points)
+	{
+		m_Points.emplace_back(Vec2(p) + position);
+	}
+}
+
+Poly::Poly(const std::vector<Vec2>& points, Vec2 position) : m_Points(points)
+{
+	for(auto& p : m_Points)
+	{
+		p += position;
+	}
+}
+
+Poly::Poly(const std::initializer_list<Vec2>& points, Vec2 position) : m_Points(points)
+{
+	for(auto& p : m_Points)
+	{
+		p += position;
+	}
 }
 
 bool Poly::IsValid() const {
@@ -21,27 +45,27 @@ int Poly::GetPointCount() const {
 	return m_Points.size();
 }
 
-std::vector<Vec2Int>::iterator Poly::begin() {
+std::vector<Vec2>::iterator Poly::begin() {
 	return m_Points.begin();
 }
 
-std::vector<Vec2Int>::iterator Poly::end() {
+std::vector<Vec2>::iterator Poly::end() {
 	return m_Points.end();
 }
 
-std::vector<Vec2Int>::const_iterator Poly::cbegin() const {
+std::vector<Vec2>::const_iterator Poly::cbegin() const {
 	return m_Points.cbegin();
 }
 
-std::vector<Vec2Int>::const_iterator Poly::cend() const {
+std::vector<Vec2>::const_iterator Poly::cend() const {
 	return m_Points.cend();
 }
 
-const Vec2Int &Poly::operator[](int index) const {
+const Vec2 &Poly::operator[](int index) const {
 	return m_Points[index];
 }
 
-Vec2Int &Poly::operator[](int index) {
+Vec2 &Poly::operator[](int index) {
 	return m_Points[index];
 }
 
@@ -80,7 +104,7 @@ std::vector<Point> Poly::GetLoopPoints() const
 	points.reserve(m_Points.size() + 1);
 	for(const auto& p : m_Points)
 	{
-		points.emplace_back(p.x, p.y);
+		points.emplace_back((int)p.x, (int)p.y);
 	}
 	points.emplace_back(m_Points[0].x, m_Points[0].y);
 	return points;
@@ -92,7 +116,7 @@ std::vector<Point> Poly::GetPoints() const
 	points.reserve(m_Points.size());
 	for(const auto& p : m_Points)
 	{
-		points.emplace_back(p.x, p.y);
+		points.emplace_back((int)p.x, (int)p.y);
 	}
 	return points;
 }

@@ -13,6 +13,13 @@
 
 class Application;
 
+enum FORME_ENUM {
+	FORME_HEART,
+	FORME_STAR,
+	FORME_POLYGONE,
+	FORME_ELLIPSE,
+};
+
 struct RenderObject
 {
 public:
@@ -36,7 +43,7 @@ enum class Tools
 	SWEEP_FILLING,
 	AREA_FILLING,
 	DRAWING,
-   
+	FORME,
 };
 
 class ToolsHandler {
@@ -167,5 +174,10 @@ private:
 	float m_CameraSpeed = 0.6f;
 //    int color=0;
 
+	FORME_ENUM m_Forme = FORME_HEART;
+	float heartSize = 100.f;
+	float armLength = 100.f; int numArms = 5;
+	float armSize = 100; int numSides = 5;
+	int numSegments = 100; float radiusX = 100.f; float radiusY = 5.f;
 
 };

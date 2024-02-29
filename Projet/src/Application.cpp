@@ -293,9 +293,8 @@ void Application::Menu()
 				m_Camera.SetSize(size);
 			}
 		}
-
-		ImGui::End();
 	}
+	ImGui::End();
 
 	m_Tools.OnImGui();
 }
