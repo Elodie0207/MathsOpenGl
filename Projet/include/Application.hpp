@@ -101,6 +101,8 @@ public:
 
 	void DrawWorldPoint(Vec2 position, float duration = 1, Color color = Color(1,1,1,1));
 	void DrawWorldLine(Vec2 from, Vec2 to, float duration = 1, Color color = Color(1,1,1,1));
+
+	void Clear();
 private:
 	static void glfw_error_callback(int error, const char* description);
 	/*

@@ -127,6 +127,8 @@ public:
 	 *
 	 */
 	void OnImGui();
+
+	void Clear();
 private:
 	/// === MOVEMENT ===
 

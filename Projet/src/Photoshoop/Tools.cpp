@@ -723,4 +723,11 @@ void ToolsHandler::OnImGui()
 
 
 
+void ToolsHandler::Clear()
+{
+	m_Polygons.clear();
+}
+
+
+
 

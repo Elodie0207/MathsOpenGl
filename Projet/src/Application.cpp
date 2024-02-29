@@ -293,6 +293,11 @@ void Application::Menu()
 				m_Camera.SetSize(size);
 			}
 		}
+
+		if(ImGui::Button("Clear All"))
+		{
+			Clear();
+		}
 	}
 	ImGui::End();
 
@@ -719,4 +724,11 @@ void Application::DrawWorldLine(Vec2 from, Vec2 to, float duration, Color color)
 void Application::glfw_error_callback(int error, const char *description)
 {
 	REI_ERROR("GLFW Error {0}: {1}", error, description);
+}
+
+void Application::Clear()
+{
+	m_Textures.clear();
+	m_TextureObjects.clear();
+	m_Tools.Clear();
 }
