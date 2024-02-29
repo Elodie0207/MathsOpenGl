@@ -9,6 +9,7 @@
 #include "Renderer/DrawObject.hpp"
 #include "Renderer/Poly.hpp"
 #include "Renderer/Quad.hpp"
+#include "Renderer/Figures.h"
 
 class Application;
 
@@ -20,6 +21,7 @@ public:
 	inline RenderObject(Poly polygon, bool isWindow = false) : Polygon(polygon), IsWindow(isWindow), Id() {}
 
 	Poly Polygon = Poly();
+
 	UUID Id = UUID();
 	bool IsWindow = false;
 };
@@ -34,6 +36,7 @@ enum class Tools
 	SWEEP_FILLING,
 	AREA_FILLING,
 	DRAWING,
+   
 };
 
 class ToolsHandler {
@@ -56,7 +59,7 @@ public:
 	 * Function called once when the application is initializing.
 	 */
 	void Initialize();
-
+    static void AddHeartAtPosition(Vec2Int screenPos);
 	/**
 	 * Function called once when the application is quitting.
 	 */
@@ -120,6 +123,7 @@ private:
 	void AddPointToPoly(Vec2Int screenPos);
 	void StopDrawingPoly();
 	Poly polyDrawn;
+
 	bool drawingPoly = false;
 
 	/// === DRAW WINDOW ===

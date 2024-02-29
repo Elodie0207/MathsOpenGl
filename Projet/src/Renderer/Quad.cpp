@@ -3,7 +3,6 @@
 //
 
 #include <utility>
-
 #include "Core.hpp"
 #include "Renderer/Quad.hpp"
 #include "Renderer/Texture.hpp"

@@ -44,6 +44,7 @@ void ToolsHandler::Initialize() {
 //	quad.m_Texture = Texture::Create(Vec4(0.1, 0.2, 0.9, 1.0), 128, 128);
 	polyDrawn.m_Color = Vec4(0.2, 0.3, 0.8, 1);
 	windowDrawn.m_Color = Vec4(0.8, 0.3, 0.2, 1);
+
 }
 
 void ToolsHandler::Destroy()
@@ -116,6 +117,7 @@ void ToolsHandler::Draw(const Mat4 &viewProjMatrix) {
 	if(m_Tool == Tools::DRAW_POLYGONE) polyDrawn.Draw(viewProjMatrix);
 	if(m_Tool == Tools::DRAW_WINDOW) windowDrawn.Draw(viewProjMatrix);
 	if(m_Tool == Tools::AREA_FILLING) m_BorderPoly.Draw(viewProjMatrix);
+
 }
 
 static Vec2 MousePosePressDraw;
@@ -188,6 +190,8 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 			}
 		}
 			break;
+
+
     }
     return false;
 }
@@ -265,6 +269,8 @@ bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 			}
 		}
 		break;
+
+
 	}
 	return false;
 }
@@ -334,7 +340,12 @@ void ToolsHandler::StopDrawingWindow()
 		windowDrawn.m_Points.clear();
 	}
 }
-
+/*void ToolsHandler::AddHeartAtPosition(Vec2Int screenPos) {
+    Vec3 worldPos = S(screenPos);
+    glPushMatrix();
+    glTranslatef(position.x, position.y, position.z);
+    glPopMatrix();
+}*/
 void ToolsHandler::AddPointToWindow(Vec2Int screenPos)
 {
 	if(drawingWindow)
@@ -375,6 +386,7 @@ void ToolsHandler::OnImGui()
 											 "SWEEP_FILLING",
 											 "AREA_FILLING",
 											 "DRAWING",
+
 	};
 	ImGui::Begin("Tools Handler");
 	{
@@ -530,6 +542,8 @@ void ToolsHandler::OnImGui()
 					{
 						m_Polygons.erase(m_Polygons.begin() + polygonIndex);
 					}
+
+
 				}
 			}
 			ImGui::PopID();

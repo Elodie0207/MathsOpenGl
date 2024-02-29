@@ -84,7 +84,8 @@ public:
 		return glm::dot(v1, v2);
 	}
 
-	static Mat4 TRS(Vec3 position);
+
+    static Mat4 TRS(Vec3 position);
 	static Mat4 TRS(Vec3 position, Quat rotation);
 	static Mat4 TRS(Vec3 position, Vec3 scale);
 	static Mat4 TRS(Vec3 position, Quat Rotation, Vec3 scale);
