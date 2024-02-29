@@ -84,6 +84,11 @@ public:
 		return glm::dot(v1, v2);
 	}
 
+	template<typename T>
+	inline static T Pi()
+	{
+		return glm::pi<T>();
+	}
 	static Mat4 TRS(Vec3 position);
 	static Mat4 TRS(Vec3 position, Quat rotation);
 	static Mat4 TRS(Vec3 position, Vec3 scale);
@@ -105,6 +110,7 @@ public:
     static bool visible(Point S, Point Fi, Point Fi1, Point centroid);
     static void fillRegionLineByLine(int x, int y, Vec2Int min, Vec2Int max, Application& app, const Color& colorContour, const Color& colorFill);
     static bool shouldBeFilled(int x, int y, Application& app, const Color& colorContour, const Color& colorFill);
+    static void fillRegion(int x, int y, std::function<bool(int,int)> boundChecker, Application& app, const Color& colorContour, const Color& colorFill0);
 
 	/**
 	 * @brief Calculates the smallest integer value greater than or equal to the given value.

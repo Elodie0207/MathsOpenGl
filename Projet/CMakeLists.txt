@@ -37,6 +37,8 @@ add_executable(MathsOpenGl
         include/SmartPtr.hpp
         include/Helper.hpp
         include/AABB2D.hpp
+        src/Renderer/Circle.cpp
+        include/Renderer/Circle.hpp
 )
 
 target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})

@@ -6,6 +6,9 @@
 #include "Application.hpp"
 #include "Parameters.hpp"
 
+Vec2 ToolsHandler::s_MousePosePressDraw = {0, 0};
+float ToolsHandler::s_CircleFillingRadius = 100;
+
 // ===================== COMMON =====================
 void ToolsHandler::SetTool(Tools tool)
 {
@@ -18,10 +21,18 @@ void ToolsHandler::SetTool(Tools tool)
 		case Tools::DRAW_WINDOW:
 			ClearDrawnWindow();
 			break;
+		case Tools::AREA_FILLING:
+			if(m_AreaFillingType == AREA_FILLING_CUSTOM)
+			{
+				m_Circle.Center = m_App->GetWorldMousePos();
+				m_Circle.Radius = s_CircleFillingRadius;
+				m_Circle.Color = m_FillColor;
+			}
+			break;
 	}
 }
 
-ToolsHandler::ToolsHandler(Application * app) : m_App(app)
+ToolsHandler::ToolsHandler(Application * app) : m_App(app), m_Circle(s_MousePosePressDraw, s_CircleFillingRadius, m_FillColor)
 {
 	REI_ASSERT(m_App != nullptr, "The application is not valid.");
 	m_Polygons.emplace_back(Poly({{128, 128}, {128, 640}, {640, 640}}), false);
@@ -115,10 +126,23 @@ void ToolsHandler::Draw(const Mat4 &viewProjMatrix) {
 	}
 	if(m_Tool == Tools::DRAW_POLYGONE) polyDrawn.Draw(viewProjMatrix);
 	if(m_Tool == Tools::DRAW_WINDOW) windowDrawn.Draw(viewProjMatrix);
-	if(m_Tool == Tools::AREA_FILLING) m_BorderPoly.Draw(viewProjMatrix);
+	if(m_Tool == Tools::AREA_FILLING) {
+		if (m_AreaFillingType == AREA_FILLING_CUSTOM) m_Circle.Draw(viewProjMatrix);
+		else m_BorderPoly.Draw(viewProjMatrix);
+	}
 }
 
-static Vec2 MousePosePressDraw;
+bool ToolsHandler::CheckCircle(int x, int y)
+{
+    // Calcul de la distance au carré entre le point (x, y) et le centre du cercle (s_MousePosePressDraw)
+    float dx = x - s_MousePosePressDraw.x;
+    float dy = y - s_MousePosePressDraw.y;
+    float distanceSquared = dx * dx + dy * dy;
+
+    // Vérification si la distance au carré est inférieure au carré du rayon
+    return distanceSquared < (s_CircleFillingRadius * s_CircleFillingRadius);
+}
+
 
 bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 {
@@ -163,18 +187,31 @@ bool ToolsHandler::OnMouseClick(MouseButton mouse, const MouseState& state)
 		case Tools::AREA_FILLING:
 		{
 			if(mouse == MouseButton::Left) {
-				MousePosePressDraw = m_App->ScreenToWorldPos(state.positionPressed);
+				s_MousePosePressDraw = m_App->ScreenToWorldPos(state.positionPressed);
 				auto halfSize = m_FillSize * 0.5f;
-				auto min = MousePosePressDraw - halfSize;
-				auto max = MousePosePressDraw + halfSize;
-				Math::fillRegionConnexity4(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+				auto min = s_MousePosePressDraw - halfSize;
+				auto max = s_MousePosePressDraw + halfSize;
+
+				switch (m_AreaFillingType) {
+
+					case AREA_FILLING_RECURSE:
+						Math::fillRegionConnexity4Recursive(s_MousePosePressDraw.x, s_MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+						break;
+					case AREA_FILLING_STACK:
+						Math::fillRegionConnexity4(s_MousePosePressDraw.x, s_MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+						break;
+					case AREA_FILLING_LINE_BY_LINE:
+						Math::fillRegionLineByLine(s_MousePosePressDraw.x, s_MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+						break;
+					case AREA_FILLING_CUSTOM:
+						Math::fillRegion(s_MousePosePressDraw.x, s_MousePosePressDraw.y, &CheckCircle, *m_App, m_BorderColor, m_FillColor);
+						break;
+				}
                 //pour la recusive
-                //Math::fillRegionConnexity4Recursive(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
-                //pour le ligne par leigne 
-                //Math::fillRegionLineByLine(MousePosePressDraw.x, MousePosePressDraw.y, min, max, *m_App, m_BorderColor, m_FillColor);
+                //pour le ligne par leigne
 
 				// TODO: get from the window the min and max (i.e. bounding box)
-				// TODO: launch using the 'MousePosePressDraw' (x/y) and min max with the 'Math::fillRegionConnexity4'.
+				// TODO: launch using the 's_MousePosePressDraw' (x/y) and min max with the 'Math::fillRegionConnexity4'.
 			}
 		}
 		break;
@@ -262,6 +299,14 @@ bool ToolsHandler::OnMouseMove(Vec2Int mousePos) {
 				auto target = m_App->ScreenToWorldPos(mousePos);
 				m_App->WriteWorldLine(m_LastDrawingPos, target, m_BorderColor, m_DrawingSize);
 				m_LastDrawingPos = target;
+			}
+		}
+		break;
+		case Tools::AREA_FILLING:
+		{
+			if(m_AreaFillingType == AREA_FILLING_CUSTOM)
+			{
+				m_Circle.Center = m_App->ScreenToWorldPos(mousePos);
 			}
 		}
 		break;
@@ -372,10 +417,17 @@ void ToolsHandler::OnImGui()
 											 "DRAW_POLYGONE",
 											 "DRAW_WINDOW",
 											 "WINDOWING",
-											 "SWEEP_FILLING",
 											 "AREA_FILLING",
 											 "DRAWING",
 	};
+
+	std::vector<std::string> sweep_filling_type_names = {
+			"AREA_FILLING_RECURSE",
+			"AREA_FILLING_STACK",
+			"SWEEP_FILLING_LINE_BY_LINE",
+			"AREA_FILLING_CUSTOM"
+	};
+
 	ImGui::Begin("Tools Handler");
 	{
 		{
@@ -397,22 +449,69 @@ void ToolsHandler::OnImGui()
 				ImGui::EndCombo();
 			}
 		}
+
 		{
-			if (m_Tool == Tools::DRAW_POLYGONE) ImGui::ColorEdit4("Poly Drawn", &polyDrawn.m_Color.x);
-			if (m_Tool == Tools::DRAW_WINDOW) ImGui::ColorEdit4("Window Drawn", &windowDrawn.m_Color.x);
-//		ImGui::ColorEdit4("Windowed Poly", &windowedPoly.m_Color.x);
+			//m_Circle
+			switch (m_Tool) {
+				case Tools::MOVE:
+					break;
+				case Tools::DRAW_POLYGONE:
+					ImGui::ColorEdit4("Poly Drawn", &polyDrawn.m_Color.x);
+					break;
+				case Tools::DRAW_WINDOW:
+					ImGui::ColorEdit4("Window Drawn", &windowDrawn.m_Color.x);
+					break;
+				case Tools::WINDOWING:
+					break;
+				case Tools::AREA_FILLING:
+					ImGui::ColorEdit4("Border Color", glm::value_ptr(m_BorderColor));
+					if(ImGui::ColorEdit4("Fill Color", glm::value_ptr(m_FillColor)))
+					{
+						m_Circle.Color = m_FillColor;
+					}
+					if(m_AreaFillingType == AREA_FILLING_TYPE::AREA_FILLING_CUSTOM)
+					{
+						if (ImGui::DragFloat("Circle Radius", &s_CircleFillingRadius)) {
+							m_Circle.Radius = s_CircleFillingRadius;
+						}
+					}
+					else
+					{
+						ImGui::DragFloat2("Fill Size", glm::value_ptr(m_FillSize), 1);
+					}
 
-			ImGui::Spacing();
-			if (m_Tool == Tools::DRAWING) {
-				ImGui::ColorEdit4("Drawing Color", glm::value_ptr(m_BorderColor));
-				ImGui::DragInt("Drawing Size", &m_DrawingSize, 1, 1, INT_MAX);
-			}
+					{
+						std::string combo_preview_value = sweep_filling_type_names[m_AreaFillingType];
+						if (ImGui::BeginCombo("Sweep Filling Type",
+											  combo_preview_value.c_str())) // The second parameter is the label previewed before opening the combo.
+						{
+							for (int n = 0; n < sweep_filling_type_names.size(); n++) {
+								bool is_selected = (m_AreaFillingType == n);
+								if (ImGui::Selectable(sweep_filling_type_names[n].c_str(), is_selected)) {
+									m_AreaFillingType = (AREA_FILLING_TYPE) n;
+									if (m_AreaFillingType == AREA_FILLING_CUSTOM) {
+										m_Circle.Center = m_App->GetWorldMousePos();
+										m_Circle.Radius = s_CircleFillingRadius;
+										m_Circle.Color = m_FillColor;
+									}
+								}
 
-			if(m_Tool == Tools::AREA_FILLING)
-			{
-				ImGui::ColorEdit4("Border Color", glm::value_ptr(m_BorderColor));
-				ImGui::ColorEdit4("Fill Color", glm::value_ptr(m_FillColor));
-				ImGui::DragFloat2("Fill Size", glm::value_ptr(m_FillSize), 1);
+								if (is_selected) {
+									ImGui::SetItemDefaultFocus();   // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+								}
+							}
+							ImGui::EndCombo();
+						}
+
+						if (m_AreaFillingType == AREA_FILLING_TYPE::AREA_FILLING_CUSTOM) {
+
+						}
+					}
+					break;
+				case Tools::DRAWING:
+					ImGui::ColorEdit4("Drawing Color", glm::value_ptr(m_BorderColor));
+					ImGui::DragInt("Drawing Size", &m_DrawingSize, 1, 1, INT_MAX);
+					break;
 			}
 		}
 		ImGui::End();
@@ -423,7 +522,7 @@ void ToolsHandler::OnImGui()
 		for (size_t polygonIndex = 0; polygonIndex < m_Polygons.size(); ++polygonIndex)
 		{
 
-#define poly m_Polygons[polygonIndex]
+			auto& poly = m_Polygons[polygonIndex];
 
 			std::string imguiId = std::to_string(poly.Id);
 			ImGui::PushID(imguiId.c_str());
