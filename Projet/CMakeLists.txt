@@ -39,7 +39,8 @@ add_executable(MathsOpenGl
         include/AABB2D.hpp
         include/Renderer/Figures.h
         src/Renderer/Figures.cpp
-        include/Renderer/Figures.h
+        src/Renderer/Circle.cpp
+        include/Renderer/Circle.hpp
 )
 
 target_include_directories(MathsOpenGl PUBLIC include/ ${FREEGLUT_INCLUDE_DIR})
