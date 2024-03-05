@@ -391,10 +391,10 @@ void Math::fillRegionConnexity4Recursive(int x, int y, Vec2Int min, Vec2Int max,
         app.WriteWorldPixel({x,y}, colorFill);
 
         // Appels récursifs pour remplir les régions adjacentes
-        fillRegionConnexity4(x + 0, y - 1, min, max, app, colorContour, colorFill); // Bas
-        fillRegionConnexity4(x - 1, y + 0, min, max, app, colorContour, colorFill); // Gauche
-        fillRegionConnexity4(x + 0, y + 1, min, max, app, colorContour, colorFill); // Haut
-        fillRegionConnexity4(x + 1, y + 0, min, max, app, colorContour, colorFill); // Droite
+        fillRegionConnexity4Recursive(x + 0, y - 1, min, max, app, colorContour, colorFill); // Bas
+        fillRegionConnexity4Recursive(x - 1, y + 0, min, max, app, colorContour, colorFill); // Gauche
+        fillRegionConnexity4Recursive(x + 0, y + 1, min, max, app, colorContour, colorFill); // Haut
+        fillRegionConnexity4Recursive(x + 1, y + 0, min, max, app, colorContour, colorFill); // Droite
     }
 }
 
